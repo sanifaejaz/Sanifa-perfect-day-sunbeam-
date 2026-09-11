@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en" data-time="day" data-weather="clear" data-season="summer">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Perfect Day 🌞</title>
+  <meta name="description" content="Build your own perfect day — pick the weather, turn up the birds, and watch the whole world change colour." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400..800&family=Outfit:wght@300..800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="style.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌞</text></svg>" />
+</head>
+<body>
+
+  <div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+
+
+  <!-- ============================================================
+       THE WORLD
+
+       One cartoon valley, repainted six different ways. Every colour
+       in here is a CSS variable, so picking a different day re-lights
+       the whole thing — nothing is swapped out or reloaded.
+
+       Nothing man-made in the scene on purpose: it's all sun, sky,
+       hills, trees, flowers, water and animals.
+       ============================================================ -->
+  <div class="world" id="world" aria-hidden="true">
+
+    <div class="world-sky"></div>
+
+    <!-- ☀️ THE SUN. Three ray layers turning at different speeds and in
+         opposite directions, so the light shimmers instead of spinning. -->
+    <div class="sun" id="sun">
+      <div class="sun-rays sun-rays-long"></div>
+      <div class="sun-rays sun-rays-mid"></div>
+      <div class="sun-rays sun-rays-spokes"></div>
+      <div class="sun-bloom"></div>
+      <div class="sun-disc">
+        <span class="sun-eye sun-eye-l"></span>
+        <span class="sun-eye sun-eye-r"></span>
+        <span class="sun-blush sun-blush-l"></span>
+        <span class="sun-blush sun-blush-r"></span>
+        <span class="sun-smile"></span>
+      </div>
+    </div>
+
+    <!-- 🌙 and the moon, for when it gets late -->
+    <div class="moon" id="moon">
+      <div class="moon-bloom"></div>
+      <div class="moon-disc">
+        <span class="moon-eye moon-eye-l"></span>
+        <span class="moon-eye moon-eye-r"></span>
+        <span class="moon-blush moon-blush-l"></span>
+        <span class="moon-blush moon-blush-r"></span>
+        <span class="moon-smile"></span>
+        <span class="moon-crater c1"></span>
+        <span class="moon-crater c2"></span>
+      </div>
+    </div>
+
+    <div class="world-stars" id="worldStars"></div>
+
+    <!-- 🌈 only turns up when it rains, obviously -->
+    <div class="rainbow">
+      <span></span><span></span><span></span>
+      <span></span><span></span><span></span>
+    </div>
+
+    <!-- ☁️ big soft cartoon clouds, each built from overlapping circles -->
+    <div class="clouds">
+      <span class="cloud cloud-1"><i></i><i></i><i></i><i></i></span>
+      <span class="cloud cloud-2"><i></i><i></i><i></i><i></i></span>
+      <span class="cloud cloud-3"><i></i><i></i><i></i><i></i></span>
+      <span class="cloud cloud-4"><i></i><i></i><i></i><i></i></span>
+    </div>
+
+    <!-- 🏞️ THE HILLS. Three layers, each drifting a little differently. -->
+    <svg class="hills hills-far" viewBox="0 0 1440 300" preserveAspectRatio="none">
+      <path d="M0 300 V170 Q120 96 260 132 T520 108 Q660 62 800 118 T1080 96 Q1230 58 1440 126 V300 Z" />
+    </svg>
+
+    <svg class="hills hills-mid" viewBox="0 0 1440 300" preserveAspectRatio="none">
+      <path d="M0 300 V206 Q160 140 320 186 T640 164 Q800 118 980 178 T1280 156 Q1380 140 1440 168 V300 Z" />
+    </svg>
+
+    <!-- 🌊 the lake at the bottom of the valley -->
+    <div class="lake">
+      <div class="lake-shine"></div>
+      <div class="lake-wave lake-wave-1"></div>
+      <div class="lake-wave lake-wave-2"></div>
+      <div class="lake-wave lake-wave-3"></div>
+      <div class="lake-sparkles" id="lakeSparkles"></div>
+    </div>
+
+    <svg class="hills hills-near" viewBox="0 0 1440 300" preserveAspectRatio="none">
+      <path d="M0 300 V248 Q200 210 420 240 T860 232 Q1120 200 1440 244 V300 Z" />
+    </svg>
+
+    <!-- 🌳 trees, swaying. Trunk plus three bobbing blobs of leaves. -->
+    <div class="trees" id="trees"></div>
+
+    <!-- 🌱 the meadow you're standing in -->
+    <div class="meadow">
+      <div class="grass" id="grass"></div>
+      <div class="flowers" id="flowers"></div>
+    </div>
+
+    <!-- everything that moves through the air -->
+    <div class="critters">
+      <div class="birds" id="birds"></div>
+      <div class="butterflies" id="butterflies"></div>
+      <div class="fireflies" id="fireflies"></div>
+      <div class="petals" id="petals"></div>
+      <div class="seeds" id="seeds"></div>
+      <div class="rain" id="rain"></div>
+    </div>
+
+    <!-- ============================================================
+         Westminster Bridge, 3rd September 1802. Only ever visible on the
+         poem day: "Ships, towers, domes, theatres, and temples lie / Open
+         unto the fields, and to the sky". Every other day this layer is
+         faded out and its animations are paused, so the valley stays a
+         valley - there are no buildings in it.
+         ============================================================ -->
+    <div class="london">
+      <div class="london-city" id="londonCity"></div>
+
+      <div class="bridge">
+        <span class="bridge-arch"></span>
+        <span class="bridge-arch"></span>
+        <span class="bridge-arch"></span>
+        <span class="bridge-arch"></span>
+        <span class="bridge-arch"></span>
+        <span class="bridge-deck"></span>
+        <span class="bridge-rail"></span>
+        <i class="bridge-lamp"></i>
+        <i class="bridge-lamp"></i>
+        <i class="bridge-lamp"></i>
+        <i class="bridge-lamp"></i>
+      </div>
+    </div>
+
+    <!-- The season layer. Same idea as the critters above: everything is
+         built once and CSS shows the layers this season calls for. -->
+    <div class="seasons">
+      <div class="blossom" id="blossom"></div>   <!-- spring -->
+      <div class="leaffall" id="leaffall"></div> <!-- autumn -->
+      <div class="snow" id="snow"></div>         <!-- winter -->
+      <div class="treats" id="treats"></div>     <!-- summer -->
+
+      <!-- Built out of divs rather than dropped in as an emoji, because
+           everything else in this valley is drawn the same way. -->
+      <div class="snowman">
+        <span class="snowman-base"></span>
+        <span class="snowman-mid"></span>
+        <span class="snowman-head">
+          <i class="snowman-eye snowman-eye-l"></i>
+          <i class="snowman-eye snowman-eye-r"></i>
+          <i class="snowman-nose"></i>
+        </span>
+        <span class="snowman-scarf"></span>
+        <i class="snowman-arm snowman-arm-l"></i>
+        <i class="snowman-arm snowman-arm-r"></i>
+      </div>
+    </div>
+
+    <div class="world-haze"></div>
+  </div>
+
+
+  <!-- ============================================================
+       NAV
+       ============================================================ -->
+  <nav class="nav">
+    <a href="#top" class="nav-logo">
+      <span class="nav-logo-mark" id="navLogoMark">🌞</span>
+      <span class="nav-logo-text">perfect day</span>
+    </a>
+
+    <span class="nav-clock" id="navClock">
+      <span class="nav-clock-time" id="navClockTime">12:20</span>
+      <span class="nav-clock-label" id="navClockLabel">sunshine</span>
+    </span>
+
+    <ul class="nav-links">
+      <li><a href="#facts" data-nav>facts</a></li>
+      <li><a href="#riddles" data-nav>riddles</a></li>
+      <li><a href="#game" data-nav>the game</a></li>
+      <li><a href="#about" data-nav>about</a></li>
+      <li><a href="#sonnet" data-nav>the poem</a></li>
+    </ul>
+
+    <div class="nav-right">
+      <button class="nav-sound" id="navSound" title="Sound on / off" aria-pressed="false">
+        <span class="nav-sound-bars" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span class="nav-sound-text">sound</span>
+      </button>
+      <button class="star-jar" id="starJar" title="Your star jar. Double-click to tip it out.">
+        <span class="star-jar-icon">⭐</span>
+        <span class="star-jar-count" id="starCount">0</span>
+      </button>
+    </div>
+
+    <!-- The toast lives INSIDE the bar on purpose. It used to be a fixed
+         element two rem off the bottom of the window, which was fine while
+         the controls were cards in the middle of the page - but every toast
+         is now fired by the corner panel, so it was landing on the chip you
+         had just pressed. Hung off the bar instead, it is out of the way,
+         next to the star jar it usually reports on, and it follows the bar's
+         real height rather than a number copied from it (the bar is 65px
+         wide-screen and 82px once these buttons wrap). -->
+    <div class="toast" id="toast" role="status" aria-live="polite">
+      <span class="toast-emoji" id="toastEmoji">⭐</span>
+      <span class="toast-text" id="toastText">+1 star!</span>
+    </div>
+  </nav>
+
+
+  <!-- ============================================================
+       HERO
+       ============================================================ -->
+  <header class="hero" id="top">
+
+    <p class="hero-kicker pop-in">✦ four hours · four weathers · four seasons ✦</p>
+
+    <h1 class="hero-title">
+      <span class="holo">Perfect</span>
+      <span class="hero-title-break"></span>
+      <span class="wave-word" aria-hidden="true"><span>D</span><span>a</span><span>y</span></span>
+      <span class="sr-only">Perfect Day</span>
+    </h1>
+
+    <p class="hero-sub pop-in delay-2">
+      Nobody agrees what a good day looks like — so this one's <b>blank</b>. 🌤️
+      <br />Everything lives in the 🎛️ panel: pick an hour, pick the weather,
+      pick a season, crank up the birds, and watch the whole valley change.
+    </p>
+
+    <div class="hero-buttons pop-in delay-3">
+      <button class="btn btn-pink" id="heroControls">🎛️ build my day</button>
+      <a href="#game" class="btn btn-lilac">⭐ skip to the game</a>
+    </div>
+
+    <p class="hero-caption" id="heroCaption">warm, bright, and absolutely nothing due.</p>
+
+    <div class="scroll-hint" aria-hidden="true">
+      <span>keep going, it gets better</span>
+      <span class="scroll-arrow">🌻</span>
+    </div>
+  </header>
+
+
+  <!-- the long bright ticker -->
+  <div class="marquee" aria-hidden="true">
+    <div class="marquee-track" id="marqueeTrack"></div>
+  </div>
+
+
+  <!-- ============================================================
+       THE THREE DIALS — the hour, the weather, the season
+       ============================================================ -->
+  <!-- ============================================================
+       FACTS — flip cards, first flip of each earns a ⭐
+       ============================================================ -->
+  <section class="section section-facts" id="facts">
+    <p class="chapter reveal">step one · showing off</p>
+    <h2 class="section-title reveal">💡 Six things about your perfect day</h2>
+    <p class="section-lead reveal">
+      Reasons the day you just built behaves like that. Flip a card — every
+      <b>new</b> one drops a ⭐ in your jar. 🫙
+    </p>
+
+    <div class="fact-grid">
+
+      <button class="fact-card reveal">
+        <span class="fact-front">
+          <span class="fact-emoji">🌅</span>
+          <span class="fact-label">first light</span>
+          <span class="fact-hint">tap to flip</span>
+        </span>
+        <span class="fact-back">
+          <span class="fact-text">
+            Sunrise is red because low sun crosses <b>way more air</b> — the blue
+            scatters off along the way and you get the leftovers. Beautiful
+            leftovers. 🍓
+          </span>
+        </span>
+      </button>
+
+      <button class="fact-card reveal">
+        <span class="fact-front">
+          <span class="fact-emoji">☀️</span>
+          <span class="fact-label">the rays</span>
+          <span class="fact-hint">tap to flip</span>
+        </span>
+        <span class="fact-back">
+          <span class="fact-text">
+            Those big shafts of light are called <b>crepuscular rays</b>. The
+            sun's rays are basically parallel — they only <i>look</i> like a fan
+            because they're heading straight at you. ✨
+          </span>
+        </span>
+      </button>
+
+      <button class="fact-card reveal">
+        <span class="fact-front">
+          <span class="fact-emoji">💧</span>
+          <span class="fact-label">raindrops</span>
+          <span class="fact-hint">tap to flip</span>
+        </span>
+        <span class="fact-back">
+          <span class="fact-text">
+            Raindrops are <b>not</b> teardrop shaped. They fall like tiny burger
+            buns — round on top, squashed flat underneath. Every drawing of rain
+            is a lie. 🍔
+          </span>
+        </span>
+      </button>
+
+      <button class="fact-card reveal">
+        <span class="fact-front">
+          <span class="fact-emoji">🐦</span>
+          <span class="fact-label">the dawn chorus</span>
+          <span class="fact-hint">tap to flip</span>
+        </span>
+        <span class="fact-back">
+          <span class="fact-text">
+            Birds go hardest before sunrise because cool, still morning air
+            carries a song <b>up to 20× further</b> than the same song at noon.
+            They're not loud, they're strategic. 📣
+          </span>
+        </span>
+      </button>
+
+      <button class="fact-card reveal">
+        <span class="fact-front">
+          <span class="fact-emoji">🌊</span>
+          <span class="fact-label">waves</span>
+          <span class="fact-hint">tap to flip</span>
+        </span>
+        <span class="fact-back">
+          <span class="fact-text">
+            A wave isn't water travelling. The water goes round in a little
+            circle and stays put — what crosses the whole ocean is the
+            <b>energy</b>, passed along like a rumour. 🌀
+          </span>
+        </span>
+      </button>
+
+      <button class="fact-card reveal">
+        <span class="fact-front">
+          <span class="fact-emoji">🦋</span>
+          <span class="fact-label">butterflies</span>
+          <span class="fact-hint">tap to flip</span>
+        </span>
+        <span class="fact-back">
+          <span class="fact-text">
+            Butterflies <b>taste with their feet</b>. They land on a flower to
+            find out whether it's worth eating. Standing on your lunch: entirely
+            normal behaviour. 👣
+          </span>
+        </span>
+      </button>
+
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       RIDDLES
+       Each .riddle carries its accepted answers in data-answers,
+       separated by | — script.js reads them from there, so adding a
+       new riddle needs no JavaScript at all.
+       ============================================================ -->
+  <section class="section section-riddles" id="riddles">
+    <p class="chapter reveal">step two · the slow bit after lunch</p>
+    <h2 class="section-title reveal">🧩 Six riddles for a day with nothing in it</h2>
+    <p class="section-lead reveal">
+      Every perfect day has an hour where <i>absolutely nothing</i> happens.
+      This is that hour. <b>Solve one and it's 2 ⭐.</b> Hints are free.
+      Revealing the answer is not. 👀
+    </p>
+
+    <div class="riddle-progress reveal">
+      <span class="riddle-progress-label">solved</span>
+      <div class="riddle-bar"><div class="riddle-bar-fill" id="riddleBarFill"></div></div>
+      <span class="riddle-progress-count"><b id="riddleSolved">0</b>/6</span>
+    </div>
+
+    <div class="riddle-grid">
+
+      <div class="riddle reveal" data-answers="sunrise|dawn|daybreak|the dawn|first light|the sunrise"
+           data-hint="Happens once a day, and you have to actually be up for it.">
+        <div class="riddle-head">
+          <span class="riddle-num">01</span>
+          <span class="riddle-tag tag-easy">easy</span>
+        </div>
+        <p class="riddle-q">
+          I turn up without making a sound, and I'm still the loudest thing
+          that happens all morning. Everything you can see was already there —
+          I just <em>hand it back</em>. What am I?
+        </p>
+        <div class="riddle-row">
+          <input class="riddle-input" type="text" placeholder="your answer..." autocomplete="off" />
+          <button class="riddle-check">check</button>
+        </div>
+        <div class="riddle-actions">
+          <button class="riddle-hint-btn">💡 hint</button>
+          <button class="riddle-reveal-btn">👀 reveal</button>
+        </div>
+        <p class="riddle-feedback"></p>
+      </div>
+
+      <div class="riddle reveal" data-answers="shadow|your shadow|a shadow|shadows"
+           data-hint="At noon it nearly gives up entirely. By evening it's enormous.">
+        <div class="riddle-head">
+          <span class="riddle-num">02</span>
+          <span class="riddle-tag tag-easy">easy</span>
+        </div>
+        <p class="riddle-q">
+          I'm shortest when the day is at its very best, longest when it's
+          nearly over, and I vanish the second the light does. I copy
+          everything you do and never once say why. What am I?
+        </p>
+        <div class="riddle-row">
+          <input class="riddle-input" type="text" placeholder="your answer..." autocomplete="off" />
+          <button class="riddle-check">check</button>
+        </div>
+        <div class="riddle-actions">
+          <button class="riddle-hint-btn">💡 hint</button>
+          <button class="riddle-reveal-btn">👀 reveal</button>
+        </div>
+        <p class="riddle-feedback"></p>
+      </div>
+
+      <div class="riddle reveal" data-answers="rain|the rain|raindrops|rainfall"
+           data-hint="It's the one weather that makes staying indoors feel earned.">
+        <div class="riddle-head">
+          <span class="riddle-num">03</span>
+          <span class="riddle-tag tag-medium">medium</span>
+        </div>
+        <p class="riddle-q">
+          I ruin the plans of anybody who made them, and I'm the best news
+          going to anybody who made none. I knock on every window in town and
+          am never once let in. What am I?
+        </p>
+        <div class="riddle-row">
+          <input class="riddle-input" type="text" placeholder="your answer..." autocomplete="off" />
+          <button class="riddle-check">check</button>
+        </div>
+        <div class="riddle-actions">
+          <button class="riddle-hint-btn">💡 hint</button>
+          <button class="riddle-reveal-btn">👀 reveal</button>
+        </div>
+        <p class="riddle-feedback"></p>
+      </div>
+
+      <div class="riddle reveal" data-answers="a wave|wave|waves|the waves"
+           data-hint="You can hear a great many of them from one deckchair. 🏖️">
+        <div class="riddle-head">
+          <span class="riddle-num">04</span>
+          <span class="riddle-tag tag-medium">medium</span>
+        </div>
+        <p class="riddle-q">
+          I cross an entire ocean, but the water I cross never comes with me.
+          I arrive, I flatten, and the next one behind me has already set off.
+          What am I?
+        </p>
+        <div class="riddle-row">
+          <input class="riddle-input" type="text" placeholder="your answer..." autocomplete="off" />
+          <button class="riddle-check">check</button>
+        </div>
+        <div class="riddle-actions">
+          <button class="riddle-hint-btn">💡 hint</button>
+          <button class="riddle-reveal-btn">👀 reveal</button>
+        </div>
+        <p class="riddle-feedback"></p>
+      </div>
+
+      <div class="riddle reveal" data-answers="today|the day|a day|this day|the present"
+           data-hint="You're standing in the answer. You always are.">
+        <div class="riddle-head">
+          <span class="riddle-num">05</span>
+          <span class="riddle-tag tag-hard">hard</span>
+        </div>
+        <p class="riddle-q">
+          I'm the only one of my kind you'll ever get to spend. You can't save
+          me, lend me, or have me back — and there's never once been a moment
+          when you weren't holding one. What am I?
+        </p>
+        <div class="riddle-row">
+          <input class="riddle-input" type="text" placeholder="your answer..." autocomplete="off" />
+          <button class="riddle-check">check</button>
+        </div>
+        <div class="riddle-actions">
+          <button class="riddle-hint-btn">💡 hint</button>
+          <button class="riddle-reveal-btn">👀 reveal</button>
+        </div>
+        <p class="riddle-feedback"></p>
+      </div>
+
+      <div class="riddle reveal" data-answers="an echo|echo|the echo"
+           data-hint="Shout at a hill. It shouts back, slightly less confidently.">
+        <div class="riddle-head">
+          <span class="riddle-num">06</span>
+          <span class="riddle-tag tag-hard">hard</span>
+        </div>
+        <p class="riddle-q">
+          I can't start a single conversation, but I've never once failed to
+          finish one. I get quieter every time I speak, and I only ever repeat
+          you. What am I?
+        </p>
+        <div class="riddle-row">
+          <input class="riddle-input" type="text" placeholder="your answer..." autocomplete="off" />
+          <button class="riddle-check">check</button>
+        </div>
+        <div class="riddle-actions">
+          <button class="riddle-hint-btn">💡 hint</button>
+          <button class="riddle-reveal-btn">👀 reveal</button>
+        </div>
+        <p class="riddle-feedback"></p>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       THE GAME
+       ============================================================ -->
+  <section class="section section-game" id="game">
+    <p class="chapter reveal">step three · the good bit</p>
+    <h2 class="section-title reveal">⭐ Catch the good stuff</h2>
+    <p class="section-lead reveal">
+      You're a jar. Lovely stuff falls out of the sky — <b>catch it</b>. Grotty
+      stuff also falls out of the sky — <b>don't</b>. Three grotty things and
+      the day's over. 🫙
+      <br /><b>Mouse</b> or <b>← →</b> to move · <b>P</b> to pause ·
+      the game recolours itself to match whatever day you picked.
+    </p>
+
+    <div class="game-frame reveal">
+
+      <div class="game-hud">
+        <span class="hud-pill">⭐ <b id="gameScore">0</b></span>
+        <span class="hud-pill hud-combo" id="gameCombo">x1</span>
+        <span class="hud-pill">lvl <b id="gameLevel">1</b></span>
+        <span class="hud-pill">🏆 <b id="gameBest">0</b></span>
+        <span class="hud-pill hud-lives" id="gameLives">💗💗💗</span>
+
+        <span class="hud-spacer"></span>
+
+        <button class="hud-btn" id="soundBtn" title="Game sound on / off">🔊</button>
+        <button class="hud-btn" id="pauseBtn" title="Pause (P)">⏸</button>
+      </div>
+
+      <div class="powerup-bar" id="powerupBar"></div>
+
+      <div class="canvas-wrap" id="canvasWrap">
+        <canvas id="gameCanvas" width="900" height="440"></canvas>
+
+        <div class="level-banner" id="levelBanner">level 2</div>
+
+        <div class="game-overlay" id="gameOverlay">
+          <h3 class="overlay-title" id="overlayTitle">ready? 🫙</h3>
+          <p class="overlay-text" id="overlayText">
+            Catch 🌻 🍀 🦋 🍎 🌈 — the rare 🌟 is worth ten and lights up the
+            whole sky.<br />
+            Dodge 🐝 wasps and 🌩️ storm clouds. Three hits and that's your day.
+          </p>
+
+          <div class="powerup-legend" id="powerupLegend">
+            <span><b>🧲</b> magnet</span>
+            <span><b>🛡️</b> shield</span>
+            <span><b>⏳</b> slow-mo</span>
+            <span><b>💎</b> 2× points</span>
+            <span><b>💗</b> +1 life</span>
+          </div>
+
+          <button class="btn btn-pink" id="playBtn">▶ let's go</button>
+          <p class="overlay-foot" id="overlayFoot">every 20 ⭐ you catch drops a real ⭐ in your jar</p>
+        </div>
+      </div>
+
+      <p class="game-footnote">
+        longest chain: <b id="gameBestCombo">0</b> · touch and drag works too 📱
+      </p>
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       ABOUT — the actual answer to the question the whole page asks
+       ============================================================ -->
+  <section class="section section-about" id="about">
+    <p class="chapter reveal">step four · the real answer</p>
+    <h2 class="section-title reveal">💛 A perfect day, in her own words</h2>
+
+    <figure class="about-quote reveal">
+      <blockquote>
+        <p class="about-quote-big">Just pure magic from morning to night.</p>
+        <p class="about-quote-small">
+          Give every day the chance to become the most beautiful day of your life.
+        </p>
+      </blockquote>
+      <figcaption>— Mark Twain</figcaption>
+    </figure>
+
+    <div class="about-body reveal">
+      <p class="about-para">
+        A perfect day for me starts with waking up early to the sound of
+        birds and a soft breeze coming through the window. I enjoy a warm cup
+        of tea while watching the sunrise, feeling calm and refreshed. After
+        that, I go for a peaceful morning walk, taking in nature and clearing
+        my mind.
+      </p>
+      <p class="about-para">
+        The rest of the day is spent doing things I love — reading a good
+        book, listening to music, and maybe spending time with close friends
+        or family. A small outing, like going to a quiet café or a nearby
+        park, makes it even better. There’s no rush, no stress — just simple
+        moments that bring joy.
+      </p>
+      <p class="about-para">
+        In the evening, I watch a favorite movie or sit under the stars,
+        reflecting on the day. A perfect day doesn’t need to be grand — it’s
+        about peace, connection, and doing what makes the heart feel full.
+      </p>
+    </div>
+
+    <!-- Each of these puts the valley into the moment the paragraph above
+         is describing, which is the whole reason the three dials exist. -->
+    <div class="about-scenes reveal">
+      <span class="about-scenes-label">take me there —</span>
+      <button class="btn btn-ghost about-scene"
+              data-scene="sunrise:clear">🌅 birds and a soft breeze</button>
+      <button class="btn btn-ghost about-scene"
+              data-scene="day:breeze">🚶 the morning walk</button>
+      <button class="btn btn-ghost about-scene"
+              data-scene="sunset:clear">📖 a book and no rush</button>
+      <button class="btn btn-ghost about-scene"
+              data-scene="night:clear">✨ sitting under the stars</button>
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       THE SONNET
+       Wordsworth, 1802. Public domain.
+       ============================================================ -->
+  <section class="section section-sonnet" id="sonnet">
+    <p class="chapter reveal">step five · somebody beat us to it</p>
+    <h2 class="section-title reveal">📜 The first perfect day on record</h2>
+    <p class="section-lead reveal">
+      On the 3rd of September 1802, William Wordsworth walked over a bridge in
+      London early enough that the city hadn't started yet — and stopped dead.
+      That sun, and those rays up there, come straight out of these 14 lines.
+      Press the button underneath and the valley becomes his view: the
+      bridge, the river, and the city with nothing switched on yet. ☀️
+    </p>
+
+    <figure class="sonnet reveal">
+      <blockquote class="sonnet-body">
+        <p>Earth has not anything to show more fair:</p>
+        <p>Dull would he be of soul who could pass by</p>
+        <p>A sight so touching in its majesty:</p>
+        <p>This City now doth, like a garment, wear</p>
+        <p>The beauty of the morning; silent, bare,</p>
+        <p>Ships, towers, domes, theatres, and temples lie</p>
+        <p>Open unto the fields, and to the sky;</p>
+        <p>All bright and glittering in the smokeless air.</p>
+        <p>Never did sun more beautifully steep</p>
+        <p>In his first splendour, valley, rock, or hill;</p>
+        <p>Ne'er saw I, never felt, a calm so deep!</p>
+        <p>The river glideth at his own sweet will:</p>
+        <p>Dear God! the very houses seem asleep;</p>
+        <p>And all that mighty heart is lying still!</p>
+      </blockquote>
+      <figcaption class="sonnet-credit">
+        William Wordsworth · <i>Composed upon Westminster Bridge, September 3, 1802</i>
+      </figcaption>
+    </figure>
+
+    <div class="sonnet-notes reveal">
+      <p>
+        The whole poem turns on one line: <b>never did sun more beautifully
+        steep in his first splendour</b>. He's not describing scenery — he's
+        describing a place with <i>nothing switched on yet</i>, and finding it
+        better than anything he'd seen in the mountains. 🏔️
+      </p>
+      <p>
+        Which is sort of the argument here too. A perfect day doesn't need
+        anything <i>in</i> it. It mainly needs you awake, outside, and looking
+        the right way. 🌻
+      </p>
+      <button class="btn btn-lilac" id="sonnetDay">🌉 take me to his bridge</button>
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       LAST PAGE + FOOTER
+       ============================================================ -->
+  <section class="section section-close" id="close">
+
+    <div class="lastpage locked reveal" id="lastPage">
+      <div class="lastpage-seal">
+        <span class="lastpage-lock">🔒</span>
+        <p class="lastpage-hint">
+          one more page · collect <b>12 ⭐</b> to crack it open
+          <span class="lastpage-count"><b id="lastPageStars">0</b>/12</span>
+        </p>
+      </div>
+
+      <div class="lastpage-body">
+        <p class="lastpage-time">the last page 🎉</p>
+        <p>
+          Here's the thing this whole page is quietly built around: you picked
+          a sky, turned up some birds, and made a day out of it. None of that
+          cost anything and none of it needed anyone's permission.
+        </p>
+        <p>
+          Wordsworth stood on a bridge for about four minutes in 1802 and got a
+          poem out of it people are still reading 200 years later. The only
+          unusual thing he did was <i>turn up early and pay attention</i>. 👀
+        </p>
+        <p class="lastpage-last">
+          So go and have the day! This page will still be here, in whatever
+          weather you left it in. 🌞
+        </p>
+      </div>
+    </div>
+
+    <footer class="footer">
+      <p>made with 💗, far too much CSS, and no build tools whatsoever</p>
+      <p class="footer-small">
+        ⭐ you collected <b id="footerStars">0</b> stars ·
+        <button class="footer-reset" id="footerReset">start the day over</button>
+      </p>
+    </footer>
+  </section>
+
+
+  <!-- ============================================================
+       THE PANEL
+
+       Every dial, pinned to the viewport. The point is that you can turn
+       something and watch the valley change in the same glance - the
+       pickers up the page make you choose and then scroll to see what you
+       chose, which is the wrong way round.
+
+       It is the same three setters underneath, so the panel and the
+       pickers can never disagree with each other.
+       ============================================================ -->
+  <!-- ============================================================
+       THE PANEL
+
+       Every control on the site, pinned to the corner of the viewport.
+       There used to be a picker section and a mixer section further down
+       the page saying exactly the same things; they are gone, because
+       scrolling away from the valley to change the valley is the wrong way
+       round. This is the only control surface now, so it carries the lot -
+       the three dials, the sun, the real-time switch, the four channels and
+       the ready-made mixes.
+
+       The chips carry the same data-time / data-weather / data-season
+       attributes the cards used to, so wireDial() and paintDials() needed
+       no changes at all when the sections went.
+       ============================================================ -->
+  <aside class="dock" id="dock" aria-label="the controls">
+    <button class="dock-toggle" id="dockToggle" aria-expanded="true"
+            aria-controls="dockBody" title="show / hide the controls">
+      <span class="dock-toggle-icon">🎛️</span>
+      <span class="dock-toggle-text">controls</span>
+      <span class="dock-toggle-chev" aria-hidden="true">‹</span>
+    </button>
+
+    <div class="dock-body" id="dockBody">
+
+      <!-- what you are currently looking at, in words -->
+      <p class="dock-now" id="dockNow">daytime · summer</p>
+
+      <div class="dock-group">
+        <span class="dock-label">
+          the hour <b class="dock-clock" id="dockClock">12:20</b>
+        </span>
+        <div class="dock-chips" id="dockTime" role="tablist" aria-label="time of day">
+          <button class="dock-chip" role="tab" data-time="sunrise">
+            <span class="dock-chip-icon">🌅</span>
+            <span class="dock-chip-name">sunrise</span>
+          </button>
+          <button class="dock-chip" role="tab" data-time="day">
+            <span class="dock-chip-icon">🌞</span>
+            <span class="dock-chip-name">daytime</span>
+          </button>
+          <button class="dock-chip" role="tab" data-time="sunset">
+            <span class="dock-chip-icon">🌄</span>
+            <span class="dock-chip-name">sunset</span>
+          </button>
+          <button class="dock-chip" role="tab" data-time="night">
+            <span class="dock-chip-icon">✨</span>
+            <span class="dock-chip-name">night</span>
+          </button>
+        </div>
+
+        <!-- Drag this and the sun really travels. The hour above follows it,
+             so the sky can never disagree with where the sun is. -->
+        <input class="dock-range dock-range-sun" id="hourSlider" type="range"
+               min="0" max="1435" step="5" value="740"
+               aria-label="move the sun through the day" />
+
+        <button class="dock-live" id="liveBtn" aria-pressed="false">
+          🕒 follow the real time
+        </button>
+        <span class="dock-note" id="liveNote">
+          or drag the sun to wherever you want it
+        </span>
+      </div>
+
+      <div class="dock-group">
+        <span class="dock-label">the weather</span>
+        <div class="dock-chips" id="dockWeather" role="tablist" aria-label="weather">
+          <button class="dock-chip" role="tab" data-weather="clear">
+            <span class="dock-chip-icon">☀️</span>
+            <span class="dock-chip-name">clear</span>
+          </button>
+          <button class="dock-chip" role="tab" data-weather="rain">
+            <span class="dock-chip-icon">🌧️</span>
+            <span class="dock-chip-name">rain</span>
+          </button>
+          <button class="dock-chip" role="tab" data-weather="breeze">
+            <span class="dock-chip-icon">🍃</span>
+            <span class="dock-chip-name">breeze</span>
+          </button>
+          <button class="dock-chip" role="tab" data-weather="seaside">
+            <span class="dock-chip-icon">🌊</span>
+            <span class="dock-chip-name">seaside</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="dock-group">
+        <span class="dock-label">the season</span>
+        <div class="dock-chips" id="dockSeason" role="tablist" aria-label="season">
+          <button class="dock-chip" role="tab" data-season="spring">
+            <span class="dock-chip-icon">🌷</span>
+            <span class="dock-chip-name">spring</span>
+          </button>
+          <button class="dock-chip" role="tab" data-season="summer">
+            <span class="dock-chip-icon">🍦</span>
+            <span class="dock-chip-name">summer</span>
+          </button>
+          <button class="dock-chip" role="tab" data-season="autumn">
+            <span class="dock-chip-icon">🍂</span>
+            <span class="dock-chip-name">autumn</span>
+          </button>
+          <button class="dock-chip" role="tab" data-season="winter">
+            <span class="dock-chip-icon">⛄</span>
+            <span class="dock-chip-name">winter</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="dock-group dock-group-sound">
+        <span class="dock-label">the sound</span>
+
+        <label class="dock-mini" data-channel="rain">
+          <span class="dock-mini-icon" title="rain">🌧️</span>
+          <input class="dock-range" type="range" min="0" max="100" value="0"
+                 data-mix="rain" aria-label="rain volume" />
+          <b class="dock-mini-val" id="mixRainVal">0</b>
+        </label>
+        <label class="dock-mini" data-channel="wind">
+          <span class="dock-mini-icon" title="breeze">🍃</span>
+          <input class="dock-range" type="range" min="0" max="100" value="0"
+                 data-mix="wind" aria-label="breeze volume" />
+          <b class="dock-mini-val" id="mixWindVal">0</b>
+        </label>
+        <label class="dock-mini" data-channel="waves">
+          <span class="dock-mini-icon" title="waves">🌊</span>
+          <input class="dock-range" type="range" min="0" max="100" value="0"
+                 data-mix="waves" aria-label="waves volume" />
+          <b class="dock-mini-val" id="mixWavesVal">0</b>
+        </label>
+        <label class="dock-mini" data-channel="birds">
+          <span class="dock-mini-icon" title="birds">🐦</span>
+          <input class="dock-range" type="range" min="0" max="100" value="0"
+                 data-mix="birds" aria-label="birds volume" />
+          <b class="dock-mini-val" id="mixBirdsVal">0</b>
+        </label>
+
+        <label class="dock-mini dock-mini-master">
+          <span class="dock-mini-icon" title="everything">🎚️</span>
+          <input class="dock-range" id="dockMaster" type="range" min="0" max="100" value="70"
+                 aria-label="master volume" />
+          <b class="dock-mini-val" id="mixMasterVal">70</b>
+        </label>
+
+        <div class="dock-presets">
+          <button class="preset-btn" data-preset="porch"  title="porch in a storm">⛈️ storm</button>
+          <button class="preset-btn" data-preset="garden" title="garden at 6am">🌻 garden</button>
+          <button class="preset-btn" data-preset="shore"  title="shore, off season">🏖️ shore</button>
+          <button class="preset-btn" data-preset="hill"   title="a very windy hill">⛰️ hill</button>
+          <button class="preset-btn preset-btn-quiet" data-preset="silence" title="silence">🤫 shhh</button>
+        </div>
+
+        <span class="dock-note">
+          none of this is a recording — every sound is built in your browser
+          out of noise and filters, so it never loops
+        </span>
+      </div>
+
+    </div>
+  </aside>
+
+
+
+  <script src="sound.js"></script>
+  <script src="script.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

@@ -1,0 +1,3244 @@
+/* ==========================================================================
+   Perfect Day — stylesheet
+
+   One cartoon valley, repainted six ways. Sun, sky, hills, trees, flowers,
+   water, birds, butterflies, fireflies. Nothing man-made in it.
+
+   THE ONE IDEA IN THIS FILE
+   Nothing is hard-coded to a colour. Every surface reads a custom property,
+   and the only place those properties are ever set is section 2. Turn one
+   of the three dials and the sky, hills, trees, grass, water, buttons and
+   sliders all move together, because none of them knew their own colour to
+   begin with.
+
+   THE THREE DIALS, all attributes on <html>
+     data-time     sunrise | day | sunset | night   - owns the light
+     data-weather  clear | rain | breeze | seaside  - owns the air
+     data-season   spring | summer | autumn | winter - owns the ground
+
+   They are independent on purpose. Sixty-four valleys, and rain at
+   midnight is just night plus rain rather than a day of its own.
+
+   The cards stay cream on every day on purpose. Only the WORLD changes
+   colour — that keeps the page vibrant without ever making text a gamble.
+
+     1. Tokens that never change
+     2. Time, weather, season  ← all the colour lives here
+     3. Base + typography
+     4. Keyframes         ← every animation lives here
+     5. The world (sun, sky, hills, trees, meadow, water, critters)
+     6. Custom cursor
+     7. Nav
+     8. Hero + marquee
+     9. Buttons
+    10. Facts
+    11. Riddles
+    12. Game
+    13. Sonnet
+    14. Last page + footer
+    15. Toast + confetti + reveal
+    16. Mobile
+    17. Reduced motion
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. TOKENS THAT NEVER CHANGE
+   ========================================================================== */
+:root {
+  /* --- the cream paper everything readable sits on --- */
+  --cream:     #FFF9F0;
+  --cream-2:   #FFF1E2;
+  --ink:       #4A3358;
+  --ink-soft:  #7C6A8A;
+  --ink-faint: #A99BB3;
+  --ink-rgb:   74, 51, 88;
+
+  /* --- the chunky cartoon shapes the page is built on --- */
+  --radius:      24px;
+  --radius-lg:   36px;
+  --radius-sm:   14px;
+  --border:      3px solid var(--ink);
+  --shadow:      6px 6px 0 var(--ink);
+  --shadow-lg:   10px 10px 0 var(--ink);
+  --shadow-soft: 6px 6px 0 rgba(var(--ink-rgb), .16);
+
+  --page: min(1160px, 92vw);
+  --ease:   cubic-bezier(.22, .61, .36, 1);
+  --bounce: cubic-bezier(.34, 1.56, .64, 1);
+
+  /* how long the whole world takes to change weather */
+  --tint: 1200ms;
+
+  /* How opaque the haze is where it meets the ground. Normally nothing -
+     haze belongs in the distance - but rain raises it so the veil covers
+     the whole frame. */
+  --haze-floor: 0;
+
+  --font-display: 'Baloo 2', 'Comic Sans MS', cursive;
+  --font-body:    'Outfit', system-ui, sans-serif;
+  --font-mono:    'Space Mono', ui-monospace, monospace;
+}
+
+
+/* ==========================================================================
+   2. THE TIME OF DAY
+
+   The first of three dials, and the one that owns the light. Sunrise, day,
+   sunset, night - nothing else. Whether it happens to be raining is a
+   separate question, asked in section 2b, which is the whole point: rain
+   at midnight is a real thing and used to be impossible here.
+
+     --sky-1..4    sky, top to horizon
+     --sun-x/y     where the sun sits, as % of the viewport
+     --ray-alpha   how visible the rays are (0 hides them entirely)
+     --star-alpha  how visible the stars are
+     --water-*     the lake
+     --accent      the "this is interactive" colour
+     --hero-ink    hero text, which sits on sky rather than on paper
+     --dark        how far this hour pulls the season's greenery to night
+
+   The ground colours (--hill-*, --tree-*, --grass-*) are declared here too
+   but they are only fallbacks: the season mix in 2d runs later and wins.
+   ========================================================================== */
+
+/* ---------- 🌅 SUNRISE. Everything pink. Sun low and enormous. ---------- */
+[data-time="sunrise"] {
+  --sky-1: #4A3A6B;  --sky-2: #A8628C;  --sky-3: #F0907E;  --sky-4: #FFD9A8;
+  --sun-x: 22%;  --sun-y: 58%;  --sun-size: 150px;
+  --sun-core: #FFF6D8;  --sun-glow: #FF9E5E;  --ray: #FFD1A0;  --ray-alpha: .55;
+  --hill-far: #6B4A78;  --hill-mid: #8D5177;  --hill-near: #5E3A63;
+  --tree-leaf: #7A4A78;  --tree-leaf-2: #A05F82;  --tree-trunk: #4A2E4F;
+  --grass: #6B3F6B;  --grass-2: #8C5280;
+  --water: #B0688A;  --water-2: #7A4A73;  --water-shine: #FFD2A6;
+  --star-alpha: .4;
+  --haze: 255, 160, 120;  --haze-alpha: .12;
+  --accent: #FF6FA5;  --accent-2: #FFC46B;
+  --hero-ink: #FFF4E8;
+  --hero-scrim: 60, 36, 70;
+  --hero-glow: 1;
+  --shade: 60, 36, 70;
+  --dark: 30%;
+}
+
+/* ---------- 🌞 DAY. The default. Blue sky, green everything. ---------- */
+[data-time="day"] {
+  --sky-1: #4FB3E8;  --sky-2: #8ED6F2;  --sky-3: #C3EBF7;  --sky-4: #F2FBE8;
+  --sun-x: 82%;  --sun-y: 23%;  --sun-size: 116px;
+  --sun-core: #FFFBE0;  --sun-glow: #FFD34E;  --ray: #FFE9A0;  --ray-alpha: .42;
+  --hill-far: #8FD98C;  --hill-mid: #67C97A;  --hill-near: #45B166;
+  --tree-leaf: #3FA45E;  --tree-leaf-2: #6BC97F;  --tree-trunk: #8A5A3B;
+  --grass: #4CB96C;  --grass-2: #7BD48A;
+  --water: #58C6E0;  --water-2: #2E9FC4;  --water-shine: #FFFCE8;
+  --star-alpha: 0;
+  --haze: 255, 250, 210;  --haze-alpha: .07;
+  --accent: #FF5FA2;  --accent-2: #FFC93C;
+  --hero-ink: #3B2A47;
+  --hero-scrim: 255, 255, 252;
+  --hero-glow: 0;
+  --shade: 30, 80, 60;
+  --dark: 0%;
+}
+
+/* ---------- 🌄 SUNSET. Golden hour.
+   Warm and saturated rather than dark - the light is low but there is a lot
+   of it, which is why the hero ink stays dark here. ---------- */
+[data-time="sunset"] {
+  --sky-1: #6E3C86;  --sky-2: #D9628A;  --sky-3: #FF9E5E;  --sky-4: #FFDC96;
+  --sun-x: 88%;  --sun-y: 60%;  --sun-size: 142px;
+  --sun-core: #FFF3C4;  --sun-glow: #FF8A3D;  --ray: #FFB35C;  --ray-alpha: .5;
+  --water: #C46E8A;  --water-2: #8A4A72;  --water-shine: #FFD9A8;
+  --star-alpha: .18;
+  --haze: 255, 168, 96;  --haze-alpha: .16;
+  --accent: #FF4F8B;  --accent-2: #FFC24A;
+  --hero-ink: #3B1E38;
+  --hero-scrim: 255, 236, 206;
+  --hero-glow: 0;
+  --shade: 70, 30, 56;
+  --dark: 34%;
+}
+
+/* ---------- ✨ NIGHT. Deep, but bright and violet, never murky. ---------- */
+[data-time="night"] {
+  --sky-1: #1B1145;  --sky-2: #33206B;  --sky-3: #543391;  --sky-4: #7A54A8;
+  --sun-x: 80%;  --sun-y: 124%;  --sun-size: 100px;   /* under the hills */
+  --sun-core: #FFF6D8;  --sun-glow: #FF9E5E;  --ray: #FFD1A0;  --ray-alpha: 0;
+  --hill-far: #3A2470;  --hill-mid: #2C1B58;  --hill-near: #1E1240;
+  --tree-leaf: #3A2470;  --tree-leaf-2: #533391;  --tree-trunk: #241645;
+  --grass: #2C1B58;  --grass-2: #422878;
+  --water: #3E2A7A;  --water-2: #25184F;  --water-shine: #C9B6FF;
+  --star-alpha: 1;
+  --haze: 130, 110, 240;  --haze-alpha: .12;
+  --accent: #FF7AC8;  --accent-2: #7BE0FF;
+  --hero-ink: #F6F1FF;
+  --hero-scrim: 10, 6, 34;
+  --hero-glow: 1;
+  --shade: 10, 6, 34;
+  --dark: 74%;
+}
+
+/* ---------- 🌉 WESTMINSTER, and not in the picker.
+   3rd September 1802, about twenty to six in the morning. Wordsworth's
+   whole point is the "smokeless air" - so this is the cleanest, palest sky
+   on the page, gold coming up behind a city that has not lit a fire yet.
+   Reached from the sonnet at the bottom, because it is a particular morning
+   rather than a time of day. ---------- */
+[data-time="poem"] {
+  --sky-1: #5E6FA8;  --sky-2: #9AA8D4;  --sky-3: #E4D3C0;  --sky-4: #FFE9C2;
+  --sun-x: 14%;  --sun-y: 60%;  --sun-size: 138px;
+  --sun-core: #FFF8DC;  --sun-glow: #FFC978;  --ray: #FFD9A0;  --ray-alpha: .38;
+  --water: #7C8AB0;  --water-2: #55618A;  --water-shine: #FFE9C2;
+  --star-alpha: .3;
+  --haze: 255, 226, 186;  --haze-alpha: .13;
+  --accent: #C2607A;  --accent-2: #E0A84E;
+  /* Portland stone, which is pale - it reads against the dark dawn water
+     where a slate-coloured bridge just disappeared into it. */
+  --stone: #E0D8EC;
+  --stone-ink: #3A3357;
+  --city: #4A4270;
+  --hero-ink: #FFF3E2;
+  --hero-scrim: 42, 38, 66;
+  --hero-glow: 1;
+  --shade: 42, 38, 66;
+  --dark: 40%;
+}
+
+
+/* ==========================================================================
+   2b. THE WEATHER
+
+   The second dial, and deliberately a thin one. The hour has already
+   decided what colour the light is; the weather only says what is falling
+   through it and what that does to the water and the air.
+
+   Nothing in here sets --sky-* or --sun-*. That is the rule that makes the
+   dials independent: if rain owned the sky, rain at midnight would repaint
+   midnight as a grey afternoon. It owns the haze instead, which sits over
+   the whole frame, so a rainy night stays a night with rain in it.
+
+   The blocks themselves live down in 2e, after the season mix, because some
+   of them need to override the ground and the mix runs last.
+   ========================================================================== */
+
+
+/* ==========================================================================
+   2c. THE FOUR SEASONS
+
+   The third dial. The hour owns the light, the weather owns the air, the
+   season owns the ground: leaves, grass, hills, and which props turn up.
+   Splitting it three ways is what lets them combine freely - four hours
+   times four weathers times four seasons, from three small sets of
+   variables.
+
+   Seasons declare --season-* rather than the real colours. The block in 2d
+   mixes those towards night by the hour's own --dark, so a winter midnight
+   goes dark without anybody writing out a winter-midnight palette.
+   ========================================================================== */
+
+[data-season="spring"] {
+  --season-leaf:     #7CD957;  --season-leaf-2:  #AEE86A;
+  --season-trunk:    #96603D;
+  --season-grass:    #7BD35E;  --season-grass-2: #A6E67C;
+  --season-hill-far: #A8E68F;  --season-hill-mid: #7FD97C;  --season-hill-near: #58C069;
+  --season-accent:   #FF8FC7;
+}
+
+[data-season="summer"] {
+  --season-leaf:     #3FA45E;  --season-leaf-2:  #6BC97F;
+  --season-trunk:    #8A5A3B;
+  --season-grass:    #4CB96C;  --season-grass-2: #7BD48A;
+  --season-hill-far: #8FD98C;  --season-hill-mid: #67C97A;  --season-hill-near: #45B166;
+  --season-accent:   #FFC93C;
+}
+
+[data-season="autumn"] {
+  --season-leaf:     #E07B32;  --season-leaf-2:  #F2B33D;
+  --season-trunk:    #6E4429;
+  --season-grass:    #C79B45;  --season-grass-2: #E0BC63;
+  --season-hill-far: #EBC078;  --season-hill-mid: #D89A4E;  --season-hill-near: #B87438;
+  --season-accent:   #FF7A3D;
+}
+
+/* Winter greenery is a contradiction, so the trees go to frosted evergreen
+   and the ground goes to snow rather than grass. */
+[data-season="winter"] {
+  --season-leaf:     #9FC4C9;  --season-leaf-2:  #C8E2E8;
+  --season-trunk:    #5E4636;
+  --season-grass:    #E6F2F7;  --season-grass-2: #FFFFFF;
+  --season-hill-far: #F2FAFF;  --season-hill-mid: #DCEDF6;  --season-hill-near: #C2DCEA;
+  --season-accent:   #7ED4F2;
+}
+
+
+/* ==========================================================================
+   2d. THE MIX
+
+   This has to come after every [data-time] block, because those still
+   declare flat fallback colours for the ground and both selectors weigh
+   the same - so source order is what decides it.
+   ========================================================================== */
+:root {
+  --nightfall: #150C33;
+
+  --tree-leaf:   color-mix(in oklab, var(--season-leaf),      var(--nightfall) var(--dark));
+  --tree-leaf-2: color-mix(in oklab, var(--season-leaf-2),    var(--nightfall) var(--dark));
+  --tree-trunk:  color-mix(in oklab, var(--season-trunk),     var(--nightfall) var(--dark));
+  --grass:       color-mix(in oklab, var(--season-grass),     var(--nightfall) var(--dark));
+  --grass-2:     color-mix(in oklab, var(--season-grass-2),   var(--nightfall) var(--dark));
+  --hill-far:    color-mix(in oklab, var(--season-hill-far),  var(--nightfall) var(--dark));
+  --hill-mid:    color-mix(in oklab, var(--season-hill-mid),  var(--nightfall) var(--dark));
+  --hill-near:   color-mix(in oklab, var(--season-hill-near), var(--nightfall) var(--dark));
+}
+
+
+/* ==========================================================================
+   2e. WHAT THE WEATHER ACTUALLY CHANGES
+
+   Down here so it lands after the mix and can override the ground. Every
+   colour is folded towards night by the hour's own --dark, exactly the way
+   the season mix is - which is what keeps a rainy midnight dark and a rainy
+   noon bright without either being written out by hand.
+
+   `clear` has no block at all. Clear weather is the hour on its own.
+   ========================================================================== */
+
+/* ---------- 🌧️ RAIN ----------
+   The sun is behind cloud, so the rays go out and the haze comes up and
+   stretches to the floor. That full-height veil is the whole trick: it
+   greys the valley at any hour instead of replacing the sky. */
+[data-weather="rain"] {
+  --ray-alpha: .06;
+  --haze: 186, 204, 212;  --haze-alpha: .30;  --haze-floor: .20;
+
+  --water:       color-mix(in oklab, #4E90A0, var(--nightfall) var(--dark));
+  --water-2:     color-mix(in oklab, #35707F, var(--nightfall) var(--dark));
+  --water-shine: color-mix(in oklab, #DCF0EE, var(--nightfall) var(--dark));
+  --accent-2: #57C9C2;
+
+  /* wet ground is darker than dry ground, at any hour. The extra 14% is
+     added to --dark rather than replacing it, so this stacks with dusk. */
+  --grass:     color-mix(in oklab, var(--season-grass),   var(--nightfall) calc(var(--dark) + 14%));
+  --grass-2:   color-mix(in oklab, var(--season-grass-2), var(--nightfall) calc(var(--dark) + 14%));
+  --tree-leaf: color-mix(in oklab, var(--season-leaf),    var(--nightfall) calc(var(--dark) + 10%));
+}
+
+/* ---------- 🌊 SEASIDE ----------
+   A beach has sand in every season and at every hour, which the season mix
+   kept painting green. Re-applied here, after it. */
+[data-weather="seaside"] {
+  --water:       color-mix(in oklab, #34C1D6, var(--nightfall) var(--dark));
+  --water-2:     color-mix(in oklab, #1B93B8, var(--nightfall) var(--dark));
+  --water-shine: color-mix(in oklab, #FFFFFF, var(--nightfall) var(--dark));
+  --accent: #FF6B6B;
+
+  --grass:       color-mix(in oklab, #E8C88C, var(--nightfall) var(--dark));
+  --grass-2:     color-mix(in oklab, #F7E2B0, var(--nightfall) var(--dark));
+  --hill-far:    color-mix(in oklab, #7FD3C4, var(--nightfall) var(--dark));
+  --hill-mid:    color-mix(in oklab, #F2D9A4, var(--nightfall) var(--dark));
+  --hill-near:   color-mix(in oklab, #E8C688, var(--nightfall) var(--dark));
+  /* palms rather than oaks, so the leaves stay blue-green whatever the
+     season is doing to everything else */
+  --tree-leaf:   color-mix(in oklab, #4FBF9E, var(--nightfall) var(--dark));
+  --tree-leaf-2: color-mix(in oklab, #7BD8B6, var(--nightfall) var(--dark));
+  --tree-trunk:  color-mix(in oklab, #9C6B45, var(--nightfall) var(--dark));
+}
+
+/* ---------- 🍃 BREEZE ----------
+   The lightest touch of the four. Moving air does not change the colour of
+   anything much; it just makes the water choppier and the lilacs come out. */
+[data-weather="breeze"] {
+  --accent: #B67BE8;  --accent-2: #5ED0B8;
+  --water:   color-mix(in oklab, #6FC8DC, var(--nightfall) var(--dark));
+  --water-2: color-mix(in oklab, #4AA6C4, var(--nightfall) var(--dark));
+}
+
+
+/* ==========================================================================
+   3. BASE + TYPOGRAPHY
+   ========================================================================== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+
+body {
+  font-family: var(--font-body);
+  font-size: clamp(1rem, .96rem + .2vw, 1.08rem);
+  line-height: 1.7;
+  color: var(--ink);
+  background: var(--sky-1);
+  overflow-x: hidden;
+  transition: background-color var(--tint) var(--ease);
+}
+
+b, strong { font-weight: 700; }
+
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+::selection { background: var(--accent); color: var(--cream); }
+
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+
+.scroll-progress {
+  position: fixed;
+  inset: 0 auto auto 0;
+  height: 4px;
+  width: 0;
+  z-index: 200;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent));
+  transition: background var(--tint) var(--ease);
+}
+
+/* --- section shell: a cream card with a chunky cartoon shadow --- */
+.section {
+  position: relative;
+  z-index: 2;
+  width: var(--page);
+  margin: 0 auto;
+  margin-block: clamp(2.4rem, 6vh, 5rem);
+  padding: clamp(1.8rem, 3.6vw, 3.2rem);
+
+  background: var(--cream);
+  border: var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+.chapter {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: .68rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--accent-2);
+  padding: .25rem .7rem;
+  border: 2px solid var(--ink);
+  border-radius: 100px;
+  margin-bottom: 1rem;
+  transition: background var(--tint) var(--ease);
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.7rem, 1.2rem + 2.2vw, 2.9rem);
+  line-height: 1.1;
+  margin-bottom: .9rem;
+  text-wrap: balance;
+}
+
+.section-lead {
+  max-width: 62ch;
+  color: var(--ink-soft);
+  margin-bottom: clamp(1.6rem, 3.4vw, 2.6rem);
+}
+
+
+/* ==========================================================================
+   4. KEYFRAMES — every animation on the page
+   ========================================================================== */
+
+/* --- the sun --- */
+@keyframes raySpin     { to { transform: rotate(360deg); } }
+@keyframes rayCounter  { to { transform: rotate(-360deg); } }
+@keyframes rayBreathe  { 0%,100% { opacity: var(--ray-alpha); } 50% { opacity: calc(var(--ray-alpha) * .5); } }
+@keyframes sunBob      { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+@keyframes sunPulse    { 0%,100% { transform: scale(1); } 50% { transform: scale(1.04); } }
+@keyframes bloomPulse  { 0%,100% { opacity: .75; transform: scale(1); } 50% { opacity: 1; transform: scale(1.15); } }
+@keyframes blink       { 0%,92%,100% { transform: scaleY(1); } 96% { transform: scaleY(.1); } }
+
+/* --- sky --- */
+@keyframes twinkle     { 0%,100% { opacity: .2; transform: scale(.6); } 50% { opacity: 1; transform: scale(1); } }
+@keyframes cloudDrift  { from { transform: translateX(-30vw); } to { transform: translateX(130vw); } }
+@keyframes cloudBob    { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+@keyframes rainbowGlow { 0%,100% { opacity: .55; } 50% { opacity: .85; } }
+
+/* --- land --- */
+@keyframes hillSway    { 0%,100% { transform: translateX(0); } 50% { transform: translateX(-10px); } }
+@keyframes treeSway    { 0%,100% { transform: rotate(-2.2deg); } 50% { transform: rotate(2.2deg); } }
+@keyframes leafBob     { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(3px,-4px) scale(1.04); } }
+@keyframes bladeSway   { 0%,100% { transform: rotate(-7deg); } 50% { transform: rotate(7deg); } }
+@keyframes flowerBob   { 0%,100% { transform: rotate(-6deg) translateY(0); } 50% { transform: rotate(6deg) translateY(-3px); } }
+
+/* --- water --- */
+@keyframes waveSlide   { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes waterShine  { 0%,100% { opacity: .35; transform: scaleY(1); } 50% { opacity: .8; transform: scaleY(1.4); } }
+@keyframes sparkle     { 0%,100% { opacity: 0; transform: scale(.4); } 50% { opacity: 1; transform: scale(1); } }
+
+/* --- critters --- */
+@keyframes birdFly     { 0%   { transform: translate(-14vw, 0) scale(.8); opacity: 0; }
+                         10%  { opacity: 1; }
+                         50%  { transform: translate(48vw, -7vh) scale(.9); }
+                         90%  { opacity: 1; }
+                         100% { transform: translate(116vw, -1vh) scale(.8); opacity: 0; } }
+@keyframes wingFlap    { 0%,100% { transform: scaleY(1); } 50% { transform: scaleY(-.7); } }
+
+@keyframes flutter     { 0%   { transform: translate(0,0) rotate(0deg); opacity: 0; }
+                         8%   { opacity: 1; }
+                         25%  { transform: translate(9vw, -6vh) rotate(12deg); }
+                         50%  { transform: translate(20vw, 3vh) rotate(-10deg); }
+                         75%  { transform: translate(31vw, -8vh) rotate(14deg); }
+                         92%  { opacity: 1; }
+                         100% { transform: translate(42vw, -2vh) rotate(0deg); opacity: 0; } }
+@keyframes butterflyWing { 0%,100% { transform: rotateY(0deg); } 50% { transform: rotateY(72deg); } }
+
+@keyframes fireflyFloat{ 0%   { transform: translate(0,0); }
+                         25%  { transform: translate(4vw, -5vh); }
+                         50%  { transform: translate(-2vw, -9vh); }
+                         75%  { transform: translate(5vw, -4vh); }
+                         100% { transform: translate(0,0); } }
+@keyframes fireflyGlow { 0%,100% { opacity: .1; box-shadow: 0 0 4px 1px #FFF6A8; }
+                         50%     { opacity: 1;  box-shadow: 0 0 14px 5px #FFF6A8; } }
+
+@keyframes petalFall   { 0%   { transform: translate3d(0, -12vh, 0) rotate(0deg); opacity: 0; }
+                         10%  { opacity: .95; }
+                         100% { transform: translate3d(-18vw, 112vh, 0) rotate(760deg); opacity: 0; } }
+@keyframes seedFloat   { 0%   { transform: translate3d(-8vw, 0, 0) rotate(0deg); opacity: 0; }
+                         12%  { opacity: .9; }
+                         50%  { transform: translate3d(45vw, -14vh, 0) rotate(200deg); }
+                         100% { transform: translate3d(112vw, 4vh, 0) rotate(420deg); opacity: 0; } }
+@keyframes rainFall    { from { transform: translate3d(0, -16vh, 0); }
+                         to   { transform: translate3d(-7vh, 116vh, 0); } }
+
+/* --- UI --- */
+@keyframes popIn       { from { opacity: 0; transform: translateY(22px) scale(.94); }
+                         to   { opacity: 1; transform: none; } }
+@keyframes letterBounce{ 0%,100% { transform: translateY(0) rotate(0deg); }
+                         50%     { transform: translateY(-14px) rotate(-4deg); } }
+@keyframes holoShift   { to { background-position: 300% 50%; } }
+@keyframes float       { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes wobble      { 0%,100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+@keyframes jelly       { 0%,100% { transform: scale(1,1); }
+                         30%     { transform: scale(1.12,.88); }
+                         55%     { transform: scale(.94,1.06); }
+                         75%     { transform: scale(1.04,.97); } }
+@keyframes shimmer     { to { transform: translateX(260%) skewX(-18deg); } }
+@keyframes marquee     { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes ripple      { to { transform: scale(2.8); opacity: 0; } }
+@keyframes confettiFall{ to { transform: translate3d(var(--cx,0), 110vh, 0) rotate(var(--cr,720deg)); opacity: 0; } }
+@keyframes toastIn     { 0%   { opacity: 0; transform: translate(-50%, -26px) scale(.88); }
+                         12%  { opacity: 1; transform: translate(-50%, 0) scale(1.04); }
+                         18%  { transform: translate(-50%, 0) scale(1); }
+                         85%  { opacity: 1; transform: translate(-50%, 0) scale(1); }
+                         100% { opacity: 0; transform: translate(-50%, -14px) scale(.96); } }
+@keyframes soundBar    { 0%,100% { transform: scaleY(.3); } 50% { transform: scaleY(1); } }
+@keyframes bannerFlash { 0%   { opacity: 0; transform: translate(-50%,-50%) scale(.6); }
+                         20%  { opacity: 1; transform: translate(-50%,-50%) scale(1.1); }
+                         80%  { opacity: 1; transform: translate(-50%,-50%) scale(1); }
+                         100% { opacity: 0; transform: translate(-50%,-50%) scale(1.2); } }
+@keyframes shake       { 0%,100% { transform: translateX(0); }
+                         20% { transform: translateX(-9px); }
+                         40% { transform: translateX(8px); }
+                         60% { transform: translateX(-6px); }
+                         80% { transform: translateX(4px); } }
+@keyframes popCorrect  { 0% { transform: scale(1); } 40% { transform: scale(1.04); } 100% { transform: scale(1); } }
+@keyframes sealFade    { to { opacity: 0; visibility: hidden; } }
+@keyframes cursorSpin  { to { transform: rotate(360deg); } }
+
+/* entrance helpers */
+.pop-in  { animation: popIn 700ms var(--bounce) both; }
+.delay-2 { animation-delay: 160ms; }
+.delay-3 { animation-delay: 300ms; }
+
+
+/* ==========================================================================
+   5. THE WORLD
+   ========================================================================== */
+.world {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.world-sky {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom,
+    var(--sky-1) 0%, var(--sky-2) 32%, var(--sky-3) 56%, var(--sky-4) 74%);
+  transition: background var(--tint) var(--ease);
+}
+
+.world-haze {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom,
+    rgba(var(--haze), calc(var(--haze-alpha) * 1.5)) 0%,
+    rgba(var(--haze), var(--haze-alpha)) 50%,
+    rgba(var(--haze), var(--haze-floor)) 100%);
+  transition: background var(--tint) var(--ease);
+}
+
+
+/* ---------- ☀️ THE SUN ----------
+   The wrapper owns the position (and is what transitions between days).
+   The bob animation lives on an inner element, because an animation on
+   the wrapper's transform would fight the translate that centres it. */
+.sun {
+  position: absolute;
+  left: var(--sun-x);
+  top: var(--sun-y);
+  width: var(--sun-size);
+  height: var(--sun-size);
+  margin-left: calc(var(--sun-size) / -2);
+  margin-top: calc(var(--sun-size) / -2);
+  animation: sunBob 7s ease-in-out infinite;
+  transition: left var(--tint) var(--ease), top var(--tint) var(--ease),
+              width var(--tint) var(--ease), height var(--tint) var(--ease),
+              margin var(--tint) var(--ease), opacity var(--tint) var(--ease);
+}
+
+[data-time="night"] .sun { opacity: 0; }
+
+/* THE RAYS.
+   Three layers of spokes, turning at very different speeds and in
+   opposite directions. That counter-rotation is what stops it reading as
+   a spinning wheel and starts it reading as light moving through air.
+
+   The mask does the real work — without it you get hard-edged spokes
+   running to the corners of the screen. With it they fade out into the
+   sky, which is what a real shaft of light does. */
+.sun-rays {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  pointer-events: none;
+  will-change: transform, opacity;
+  -webkit-mask-image: radial-gradient(closest-side,
+    rgba(0,0,0,.95) 5%, rgba(0,0,0,.6) 24%, rgba(0,0,0,.22) 46%, transparent 68%);
+  mask-image: radial-gradient(closest-side,
+    rgba(0,0,0,.95) 5%, rgba(0,0,0,.6) 24%, rgba(0,0,0,.22) 46%, transparent 68%);
+  transition: opacity var(--tint) var(--ease);
+}
+
+.sun-rays-long {
+  width: 1600px; height: 1600px; margin: -800px 0 0 -800px;
+  background: repeating-conic-gradient(from 0deg,
+    var(--ray) 0deg 1.2deg, transparent 1.2deg 14deg);
+  opacity: var(--ray-alpha);
+  animation: raySpin 200s linear infinite, rayBreathe 9s ease-in-out infinite;
+  will-change: transform;
+}
+
+.sun-rays-mid {
+  width: 1000px; height: 1000px; margin: -500px 0 0 -500px;
+  background: repeating-conic-gradient(from 6deg,
+    var(--ray) 0deg 2.6deg, transparent 2.6deg 22deg);
+  opacity: calc(var(--ray-alpha) * .8);
+  animation: rayCounter 120s linear infinite, rayBreathe 6.5s ease-in-out infinite reverse;
+  will-change: transform;
+}
+
+/* the chunky cartoon spokes right at the sun */
+.sun-rays-spokes {
+  width: 520px; height: 520px; margin: -260px 0 0 -260px;
+  background: repeating-conic-gradient(from 12deg,
+    var(--ray) 0deg 5deg, transparent 5deg 30deg);
+  opacity: calc(var(--ray-alpha) * .9);
+  animation: raySpin 46s linear infinite, rayBreathe 4.5s ease-in-out infinite;
+  will-change: transform;
+}
+
+.sun-bloom {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 560px; height: 560px;
+  margin: -280px 0 0 -280px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--sun-glow) 0%, rgba(255,255,255,0) 62%);
+  opacity: .5;
+  animation: bloomPulse 8s ease-in-out infinite;
+  transition: background var(--tint) var(--ease);
+}
+
+.sun-disc {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 36% 32%, #fff 0%, var(--sun-core) 44%, var(--sun-glow) 100%);
+  /* Everything else in this valley has a chunky outline, and the sun used
+     to be the exception - which made it vanish into a pale sky the moment
+     it passed behind the title. Warm and semi-opaque rather than the ink
+     black used on the ground, so it still reads as light. */
+  border: 3px solid rgba(190, 96, 24, .5);
+  box-shadow: 0 0 44px 10px var(--sun-glow), 0 0 130px 44px rgba(255, 200, 130, .32);
+  animation: sunPulse 5.5s ease-in-out infinite;
+  transition: background var(--tint) var(--ease), box-shadow var(--tint) var(--ease);
+}
+
+/* the sun has a face, because this page is allowed to be fun */
+.sun-eye {
+  position: absolute;
+  top: 36%;
+  width: 9%; height: 15%;
+  border-radius: 50%;
+  background: rgba(120, 62, 24, .72);
+  animation: blink 5.5s ease-in-out infinite;
+}
+.sun-eye-l { left: 29%; }
+.sun-eye-r { right: 29%; }
+
+.sun-blush {
+  position: absolute;
+  top: 52%;
+  width: 15%; height: 8%;
+  border-radius: 50%;
+  background: rgba(235, 110, 90, .34);
+}
+.sun-blush-l { left: 14%; }
+.sun-blush-r { right: 14%; }
+
+.sun-smile {
+  position: absolute;
+  left: 50%; top: 51%;
+  width: 26%; height: 15%;
+  margin-left: -13%;
+  border: 3px solid rgba(120, 62, 24, .62);
+  border-top: 0;
+  border-radius: 0 0 60% 60%;
+}
+
+
+/* ---------- 🌙 THE MOON ---------- */
+/* The moon runs the same arc as the sun, twelve hours out of step - see
+   skyArc in script.js. Both positions are written as custom properties, so
+   the transition below is all it takes to make them glide. */
+.moon {
+  position: absolute;
+  left: var(--moon-x, 78%);
+  top: var(--moon-y, 15%);
+  width: 104px; height: 104px;
+  margin-left: -52px;
+  margin-top: -52px;
+  opacity: 0;
+  animation: sunBob 9s ease-in-out infinite;
+  transition: opacity var(--tint) var(--ease),
+              left var(--tint) var(--ease), top var(--tint) var(--ease);
+}
+
+[data-time="night"]   .moon { opacity: 1; }
+[data-time="sunrise"] .moon { opacity: .4; }
+
+.moon-bloom {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 380px; height: 380px;
+  margin: -190px 0 0 -190px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(200, 200, 255, .42) 0%, transparent 64%);
+  animation: bloomPulse 11s ease-in-out infinite;
+}
+
+.moon-disc {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%, #fff 0%, #F2EEFF 46%, #C6BCEC 100%);
+  border: 3px solid rgba(90, 70, 140, .2);
+  box-shadow: 0 0 40px 8px rgba(200, 190, 255, .5);
+}
+
+.moon-eye {
+  position: absolute;
+  top: 38%;
+  width: 8%; height: 13%;
+  border-radius: 50%;
+  background: rgba(80, 60, 130, .68);
+  animation: blink 7s ease-in-out infinite;
+}
+.moon-eye-l { left: 30%; }
+.moon-eye-r { right: 34%; }
+
+.moon-blush {
+  position: absolute;
+  top: 53%;
+  width: 13%; height: 7%;
+  border-radius: 50%;
+  background: rgba(190, 130, 200, .3);
+}
+.moon-blush-l { left: 17%; }
+.moon-blush-r { right: 21%; }
+
+.moon-smile {
+  position: absolute;
+  left: 46%; top: 53%;
+  width: 20%; height: 11%;
+  margin-left: -10%;
+  border: 2.5px solid rgba(80, 60, 130, .55);
+  border-top: 0;
+  border-radius: 0 0 60% 60%;
+}
+
+.moon-crater {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(150, 138, 205, .34);
+}
+.moon-crater.c1 { width: 17%; height: 17%; right: 12%; top: 22%; }
+.moon-crater.c2 { width: 11%; height: 11%; right: 26%; bottom: 16%; }
+
+
+/* ---------- ⭐ STARS ---------- */
+.world-stars {
+  position: absolute;
+  inset: 0 0 46% 0;
+  opacity: var(--star-alpha);
+  transition: opacity var(--tint) var(--ease);
+}
+
+.star {
+  position: absolute;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 7px 2px rgba(255,255,255,.75);
+  /* Most stars just sit there. Only the ones tagged .tw twinkle: a field
+     where half the dots move reads the same as one where all of them do,
+     and every running animation costs a slice of every frame. */
+  opacity: .62;
+  transform: scale(.82);
+}
+
+.star.tw {
+  animation: twinkle var(--dur, 4s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+
+/* ---------- 🌈 RAINBOW ----------
+   Six nested arcs. Each is a box with only its top and side borders, and
+   an elliptical radius on the top corners only — which draws a ring and
+   leaves the bottom open. */
+.rainbow {
+  position: absolute;
+  left: 50%;
+  bottom: 26%;
+  width: 78vw;
+  height: 40vw;
+  margin-left: -39vw;
+  opacity: 0;
+  transition: opacity var(--tint) var(--ease);
+}
+
+/* A rainbow is sunlight through rain, so it needs both. No rainbow at
+   midnight, however hard it is coming down. */
+[data-weather="rain"]:not([data-time="night"]) .rainbow {
+  opacity: 1;
+  animation: rainbowGlow 6s ease-in-out infinite;
+}
+
+.rainbow span {
+  position: absolute;
+  left: 50%; bottom: 0;
+  border-style: solid;
+  border-bottom: 0;
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  border-width: 9px 9px 0 9px;
+  transform: translateX(-50%);
+}
+.rainbow span:nth-child(1) { width: 100%;  height: 100%;  border-color: #FF7A8A; }
+.rainbow span:nth-child(2) { width: 88.5%; height: 88.5%; border-color: #FFB35C; }
+.rainbow span:nth-child(3) { width: 77%;   height: 77%;   border-color: #FFE066; }
+.rainbow span:nth-child(4) { width: 65.5%; height: 65.5%; border-color: #86DB8C; }
+.rainbow span:nth-child(5) { width: 54%;   height: 54%;   border-color: #6FC4EE; }
+.rainbow span:nth-child(6) { width: 42.5%; height: 42.5%; border-color: #B98BE8; }
+
+
+/* ---------- ☁️ CLOUDS ----------
+   Four overlapping circles read as a cartoon cloud far better than one
+   ellipse does, and cost nothing. The wrapper drifts sideways; the inner
+   circles bob up and down, so the two motions don't fight over one
+   transform. */
+.clouds { position: absolute; inset: 0 0 50% 0; }
+
+.cloud {
+  position: absolute;
+  width: 220px;
+  height: 70px;
+  animation: cloudDrift linear infinite;
+  will-change: transform;
+}
+
+.cloud i {
+  position: absolute;
+  bottom: 0;
+  border-radius: 50%;
+  background: #fff;
+  opacity: .92;
+  animation: cloudBob ease-in-out infinite;
+}
+
+.cloud i:nth-child(1) { left: 0;   width: 46%; height: 68%;  animation-duration: 6s;   }
+.cloud i:nth-child(2) { left: 24%; width: 58%; height: 100%; animation-duration: 7.5s; }
+.cloud i:nth-child(3) { left: 56%; width: 44%; height: 76%;  animation-duration: 6.8s; }
+.cloud i:nth-child(4) { left: 12%; width: 76%; height: 46%;  animation-duration: 8.2s; }
+
+.cloud-1 { top: 10%; scale: 1;    animation-duration: 120s; }
+.cloud-2 { top: 22%; scale: .72;  animation-duration: 170s; animation-delay: -50s; }
+.cloud-3 { top: 5%;  scale: 1.25; animation-duration: 210s; animation-delay: -120s; }
+.cloud-4 { top: 32%; scale: .58;  animation-duration: 145s; animation-delay: -20s; }
+
+/* each day gets its own cloud colour and density */
+[data-time="night"]   .cloud i { opacity: .3;  background: #B9A8E8; }
+[data-time="sunrise"] .cloud i { opacity: .8;  background: #FFE0D0; }
+/* Rain last, so it wins at every hour - and heavier, because it has to
+   look like the thing the rain is coming out of. */
+[data-weather="rain"] .cloud i { opacity: .95; background: #E8EEF0; }
+[data-time="night"][data-weather="rain"] .cloud i { opacity: .8; background: #8B86B8; }
+
+
+/* ---------- 🏞️ THE HILLS ---------- */
+.hills {
+  position: absolute;
+  left: -2%;
+  width: 104%;
+  height: 30vh;
+  min-height: 190px;
+  transition: opacity var(--tint) var(--ease);
+}
+
+.hills path { transition: fill var(--tint) var(--ease); }
+
+.hills-far  { bottom: 26%; animation: hillSway 26s ease-in-out infinite; will-change: transform; }
+.hills-mid  { bottom: 18%; animation: hillSway 19s ease-in-out infinite reverse; will-change: transform; }
+.hills-near { bottom: 10%; }
+
+.hills-far  path { fill: var(--hill-far);  }
+.hills-mid  path { fill: var(--hill-mid);  }
+.hills-near path { fill: var(--hill-near); }
+
+
+/* ---------- 🌊 THE LAKE ---------- */
+.lake {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: 14%;
+  height: 15%;
+  background: linear-gradient(to bottom, var(--water) 0%, var(--water-2) 100%);
+  overflow: hidden;
+  transition: background var(--tint) var(--ease), height var(--tint) var(--ease),
+              bottom var(--tint) var(--ease);
+}
+
+/* the seaside day lets the water take over */
+[data-weather="seaside"] .lake { height: 26%; bottom: 10%; }
+[data-weather="rain"]    .lake { height: 18%; }
+
+.lake-shine {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(to bottom,
+    rgba(255,255,255,.14) 0px, rgba(255,255,255,.14) 2px,
+    transparent 2px, transparent 9px);
+  animation: waterShine 7s ease-in-out infinite;
+}
+
+/* Each wave band is 200% wide with a pattern that repeats every half, and
+   slides by exactly -50%. Because the pattern repeats on that boundary the
+   slide lands on an identical frame, so the loop is invisible. */
+.lake-wave {
+  position: absolute;
+  left: 0;
+  width: 200%;
+  height: 14px;
+  background: radial-gradient(ellipse 40px 14px at 20px 14px,
+    var(--water-shine) 0 60%, transparent 62%) repeat-x;
+  background-size: 90px 14px;
+  opacity: .5;
+  animation: waveSlide linear infinite;
+  will-change: transform;
+  transition: background var(--tint) var(--ease);
+}
+.lake-wave-1 { top: 6%;  animation-duration: 9s;  }
+.lake-wave-2 { top: 34%; animation-duration: 14s; animation-direction: reverse; opacity: .34; }
+.lake-wave-3 { top: 64%; animation-duration: 20s; opacity: .22; }
+
+.lake-sparkles { position: absolute; inset: 0; }
+
+.lake-sparkle {
+  position: absolute;
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--water-shine);
+  box-shadow: 0 0 8px 2px var(--water-shine);
+  animation: sparkle var(--dur, 3s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+
+/* ---------- 🌳 TREES ----------
+   A trunk plus three blobs of leaves. The whole tree rocks from its base
+   (transform-origin at the bottom), and each leaf blob bobs on its own
+   timer on top of that. */
+.trees { position: absolute; left: 0; right: 0; bottom: 11%; height: 26vh; }
+
+.tree {
+  position: absolute;
+  bottom: 0;
+  transform-origin: 50% 100%;
+  animation: treeSway var(--sway, 5s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.tree-trunk {
+  position: absolute;
+  left: 50%; bottom: 0;
+  width: 13%;
+  height: 46%;
+  margin-left: -6.5%;
+  border-radius: 40% 40% 12% 12%;
+  background: var(--tree-trunk);
+  transition: background var(--tint) var(--ease);
+}
+
+.tree-leaf {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--tree-leaf);
+  animation: leafBob ease-in-out infinite;
+  transition: background var(--tint) var(--ease);
+}
+.tree-leaf:nth-of-type(1) { left: 4%;  bottom: 38%; width: 56%; height: 40%; animation-duration: 4.2s; }
+.tree-leaf:nth-of-type(2) { right: 2%; bottom: 44%; width: 52%; height: 38%; animation-duration: 5.1s;
+                            background: var(--tree-leaf-2); }
+.tree-leaf:nth-of-type(3) { left: 18%; bottom: 56%; width: 64%; height: 44%; animation-duration: 4.7s; }
+
+
+/* ==========================================================================
+   🌉 WESTMINSTER BRIDGE
+
+   Faded out on every day but the poem, and its animations paused with it,
+   so this costs nothing the rest of the time. Everything here is drawn
+   with the same border-and-radius vocabulary as the rest of the valley -
+   the city is a silhouette rather than a picture, which is what a place
+   looks like when the sun is still behind it.
+   ========================================================================== */
+
+.london {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--tint) var(--ease);
+}
+
+[data-time="poem"] .london { opacity: 1; }
+
+/* ---------- the city, along the far bank ---------- */
+.london-city {
+  position: absolute;
+  left: -2%; right: -2%;
+  bottom: 34%;
+  height: 96px;
+}
+
+.bldg {
+  position: absolute;
+  bottom: 0;
+  left: var(--left, 0%);
+  width: var(--w, 22px);
+  height: var(--h, 40px);
+  background: var(--city, #3E3A5E);
+  border-radius: 2px 2px 0 0;
+}
+
+/* windows, but only a few: nothing is switched on yet */
+.bldg.lit::after {
+  content: '';
+  position: absolute;
+  left: 28%; top: 22%;
+  width: 3px; height: 3px;
+  background: #FFD98A;
+  border-radius: 1px;
+  box-shadow: 0 0 5px 1px rgba(255, 210, 130, .8);
+}
+
+/* a pitched roof */
+.bldg.roof::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; top: -8px;
+  height: 0;
+  border-left: calc(var(--w, 22px) / 2) solid transparent;
+  border-right: calc(var(--w, 22px) / 2) solid transparent;
+  border-bottom: 8px solid var(--city, #3E3A5E);
+}
+
+/* a church spire */
+.bldg.spire::before {
+  content: '';
+  position: absolute;
+  left: 50%; top: -22px;
+  margin-left: -4px;
+  width: 0; height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-bottom: 22px solid var(--city, #3E3A5E);
+}
+
+/* St Paul's: a dome with a lantern on top */
+.dome {
+  position: absolute;
+  bottom: 0;
+  left: var(--left, 46%);
+  width: 46px; height: 34px;
+  background: var(--city, #3E3A5E);
+  border-radius: 4px 4px 0 0;
+}
+.dome::before {
+  content: '';
+  position: absolute;
+  left: 50%; bottom: 26px;
+  width: 34px; height: 30px;
+  margin-left: -17px;
+  background: var(--city, #3E3A5E);
+  border-radius: 50% 50% 18% 18%;
+}
+.dome::after {
+  content: '';
+  position: absolute;
+  left: 50%; bottom: 52px;
+  width: 6px; height: 13px;
+  margin-left: -3px;
+  background: var(--city, #3E3A5E);
+  border-radius: 3px 3px 0 0;
+}
+
+/* ships' masts down at the wharf */
+.mast {
+  position: absolute;
+  bottom: 0;
+  left: var(--left, 10%);
+  width: 2px;
+  height: var(--h, 34px);
+  background: var(--city, #3E3A5E);
+}
+.mast::before {
+  content: '';
+  position: absolute;
+  left: -7px; top: 22%;
+  width: 16px; height: 2px;
+  background: var(--city, #3E3A5E);
+}
+
+/* ---------- the bridge ---------- */
+.bridge {
+  position: absolute;
+  left: -6%; right: -6%;
+  bottom: 14%;
+  height: 88px;
+}
+
+.bridge span, .bridge i { position: absolute; }
+
+/* Five arches, evenly spaced. The bottom half of each circle is hidden
+   under the deck, so only the arch itself shows above the water. */
+/* Each arch is a thick pale ring with its bottom half hidden under the
+   water line, so only the span shows. The gaps between them read as the
+   piers standing in the river. */
+.bridge-arch {
+  bottom: 0;
+  width: 18%;
+  height: 56px;
+  background: transparent;
+  border: 9px solid var(--stone, #E0D8EC);
+  border-bottom: none;
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  box-shadow: inset 0 0 0 2px var(--stone-ink, #3A3357),
+              0 0 0 2px var(--stone-ink, #3A3357);
+}
+.bridge-arch:nth-of-type(1) { left: 1%;  }
+.bridge-arch:nth-of-type(2) { left: 21%; }
+.bridge-arch:nth-of-type(3) { left: 41%; }
+.bridge-arch:nth-of-type(4) { left: 61%; }
+.bridge-arch:nth-of-type(5) { left: 81%; }
+
+.bridge-deck {
+  left: 0; right: 0;
+  bottom: 50px;
+  height: 15px;
+  background: var(--stone, #E0D8EC);
+  border-top: 2px solid var(--stone-ink, #3A3357);
+  border-bottom: 2px solid var(--stone-ink, #3A3357);
+}
+
+/* the balustrade: a row of little stone posts */
+.bridge-rail {
+  left: 0; right: 0;
+  bottom: 65px;
+  height: 10px;
+  background: repeating-linear-gradient(to right,
+    var(--stone, #E0D8EC) 0px, var(--stone, #E0D8EC) 4px,
+    transparent 4px, transparent 10px);
+}
+
+/* lamps along the parapet, lit because the poem's city has not woken but
+   the bridge is still a road */
+.bridge-lamp {
+  bottom: 74px;
+  width: 4px; height: 15px;
+  background: var(--stone-ink, #3A3357);
+  border-radius: 2px;
+}
+.bridge-lamp::after {
+  content: '';
+  position: absolute;
+  left: 50%; top: -8px;
+  width: 9px; height: 9px;
+  margin-left: -4.5px;
+  background: #FFE9A8;
+  border-radius: 50%;
+  box-shadow: 0 0 8px 3px rgba(255, 216, 130, .75);
+  animation: lampFlicker 5.5s ease-in-out infinite;
+}
+.bridge-lamp:nth-of-type(1) { left: 12%; }
+.bridge-lamp:nth-of-type(2) { left: 37%; }
+.bridge-lamp:nth-of-type(3) { left: 62%; }
+.bridge-lamp:nth-of-type(4) { left: 87%; }
+.bridge-lamp:nth-of-type(2)::after { animation-delay: -1.4s; }
+.bridge-lamp:nth-of-type(3)::after { animation-delay: -2.9s; }
+.bridge-lamp:nth-of-type(4)::after { animation-delay: -4.1s; }
+
+/* The poem morning has no rainbow and no wildlife in it - it is a city at
+   dawn, and the whole line is "silent, bare". */
+/* "silent, bare" - so no wildlife and no picnic on this one. The .world
+   prefix is load-bearing: the season and critter rules that switch these
+   on live further down the file and weigh the same, so an unprefixed
+   selector here loses on source order. */
+[data-time="poem"] .world .butterflies,
+[data-time="poem"] .world .fireflies,
+[data-time="poem"] .world .treats { opacity: 0; }
+
+
+/* ---------- 🦉 THE OWLS ----------
+   Only out at night, and only in the trees. Built from a <b> rather than a
+   div on purpose: the leaf rules above use :nth-of-type, which counts by
+   tag, so anything new inside a tree has to be a tag the leaves are not.
+
+   The eyes are the whole point, so they get a bright core, a warm halo and
+   a slow pulse. The pulse animates opacity rather than box-shadow - a
+   moving blur radius repaints the element every frame, and there is one of
+   these per tree. */
+.owl {
+  position: absolute;
+  left: 50%;
+  bottom: var(--perch, 50%);
+  width: 26px; height: 29px;
+  margin-left: -13px;
+  opacity: 0;
+  z-index: 3;
+  transition: opacity var(--tint) var(--ease);
+}
+
+[data-time="night"] .owl { opacity: 1; }
+
+/* body: a rounded blob, wider at the bottom */
+.owl-body {
+  position: absolute;
+  inset: 5px 0 0 0;
+  background: #4A3A52;
+  border: 2px solid #241A2E;
+  border-radius: 52% 52% 44% 44%;
+}
+
+/* the paler front, so it reads as a bird and not a pebble */
+.owl-bib {
+  position: absolute;
+  left: 50%; bottom: 2px;
+  width: 13px; height: 15px;
+  margin-left: -6.5px;
+  background: #B9A2C4;
+  border-radius: 50% 50% 42% 42%;
+  opacity: .55;
+}
+
+/* ear tufts */
+.owl-tuft {
+  position: absolute;
+  top: 0;
+  width: 0; height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-bottom: 8px solid #4A3A52;
+}
+.owl-tuft-l { left: 2px;  transform: rotate(-16deg); }
+.owl-tuft-r { right: 2px; transform: rotate(16deg); }
+
+.owl-eye {
+  position: absolute;
+  top: 9px;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: #FFF6C4;
+  border: 1.5px solid #241A2E;
+  box-shadow: 0 0 7px 2px rgba(255, 232, 140, .85),
+              0 0 16px 6px rgba(255, 214, 90, .35);
+  animation: owlGlow 3.4s ease-in-out infinite;
+  animation-delay: var(--blink, 0s);
+}
+.owl-eye-l { left: 3px; }
+.owl-eye-r { right: 3px; }
+
+/* the pupil, so the eyes have somewhere to look */
+.owl-eye::after {
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 3px; height: 3px;
+  margin: -1.5px 0 0 -1.5px;
+  background: #241A2E;
+  border-radius: 50%;
+}
+
+.owl-beak {
+  position: absolute;
+  left: 50%; top: 16px;
+  margin-left: -2.5px;
+  width: 0; height: 0;
+  border-left: 2.5px solid transparent;
+  border-right: 2.5px solid transparent;
+  border-top: 5px solid #FFB35C;
+}
+
+
+/* ---------- 🌱 THE MEADOW ---------- */
+.meadow {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 13%;
+  background: linear-gradient(to bottom, var(--grass-2) 0%, var(--grass) 100%);
+  transition: background var(--tint) var(--ease);
+}
+
+.grass { position: absolute; inset: 0; }
+
+.blade {
+  position: absolute;
+  bottom: 0;
+  width: 5px;
+  border-radius: 50% 50% 0 0;
+  background: var(--grass-2);
+  transform-origin: 50% 100%;
+  transition: background var(--tint) var(--ease);
+}
+
+.blade.sw {
+  animation: bladeSway var(--sway, 3s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.flowers { position: absolute; inset: 0; }
+
+.flower {
+  position: absolute;
+  bottom: 0;
+  width: 22px;
+  transform-origin: 50% 100%;
+  animation: flowerBob var(--sway, 4s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.flower-stem {
+  position: absolute;
+  left: 50%; bottom: 0;
+  width: 3px;
+  height: 100%;
+  margin-left: -1.5px;
+  background: #4C9B58;
+  border-radius: 2px;
+}
+
+.flower-head {
+  position: absolute;
+  left: 50%; top: 0;
+  width: 22px; height: 22px;
+  margin-left: -11px;
+}
+
+/* five petals placed round a circle, each rotated into place by JS */
+.flower-petal {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 9px; height: 13px;
+  margin: -11px 0 0 -4.5px;
+  border-radius: 50%;
+  background: var(--petal, #FF8FC7);
+  transform-origin: 50% 100%;
+}
+
+.flower-core {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 8px; height: 8px;
+  margin: -4px 0 0 -4px;
+  border-radius: 50%;
+  background: #FFD645;
+}
+
+
+/* ---------- 🐦🦋✨ CRITTERS ---------- */
+.critters { position: absolute; inset: 0; }
+.critters > div { position: absolute; inset: 0; transition: opacity var(--tint) var(--ease); }
+
+/* which critters each day gets. Everything exists all the time; CSS just
+   shows the ones this weather calls for. */
+.birds, .butterflies, .fireflies, .petals, .seeds, .rain { opacity: 0; }
+
+/* Birds are out at every hour but night. Butterflies want real daylight. */
+[data-time="sunrise"] .birds,
+[data-time="day"]     .birds,
+[data-time="sunset"]  .birds,
+[data-time="poem"]    .birds        { opacity: 1; }
+
+[data-time="day"]     .butterflies,
+[data-time="sunrise"] .butterflies  { opacity: 1; }
+
+[data-time="night"]   .fireflies    { opacity: 1; }
+
+/* The weather rules come last on purpose, so they overrule the hour. */
+[data-weather="rain"]    .rain       { opacity: 1; }
+[data-weather="rain"]    .petals     { opacity: 1; }
+[data-weather="breeze"]  .seeds      { opacity: 1; }
+
+/* Butterflies genuinely do not fly in rain, and nobody leaves an ice cream
+   out in it. Birds stay - they sing right through it, and the mixer keeps
+   them up, so hiding them here would have the sound and the picture
+   disagreeing about whether there are any. */
+[data-weather="rain"]    .butterflies,
+/* .world buys a point of specificity over the season rule further down,
+   which weighs the same and would otherwise win on source order alone. */
+[data-weather="rain"]    .world .treats { opacity: 0; }
+
+
+.bird {
+  position: absolute;
+  top: var(--top, 20%);
+  display: flex;
+  gap: 2px;
+  animation: birdFly var(--dur, 40s) linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.bird i {
+  display: block;
+  width: 13px; height: 5px;
+  border-radius: 70% 70% 0 0;
+  border-top: 3px solid rgba(60, 44, 74, .58);
+  animation: wingFlap var(--flap, .5s) ease-in-out infinite;
+}
+.bird i:last-child { animation-direction: reverse; }
+
+.butterfly {
+  position: absolute;
+  top: var(--top, 55%);
+  left: var(--left, 10%);
+  display: flex;
+  animation: flutter var(--dur, 26s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.butterfly i {
+  display: block;
+  width: 11px; height: 15px;
+  border-radius: 60% 60% 40% 40%;
+  background: var(--wing, #FF8FC7);
+  animation: butterflyWing var(--flap, .35s) ease-in-out infinite;
+}
+.butterfly i:first-child { transform-origin: right center; }
+.butterfly i:last-child  { transform-origin: left center; animation-direction: reverse; }
+
+.firefly {
+  position: absolute;
+  top: var(--top, 60%);
+  left: var(--left, 20%);
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: #FFF6A8;
+  animation: fireflyFloat var(--dur, 18s) ease-in-out infinite,
+             fireflyGlow var(--glow, 3s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.petal {
+  position: absolute;
+  top: 0;
+  width: 10px; height: 10px;
+  border-radius: 50% 0 50% 50%;
+  background: var(--petal, #FFB3D1);
+  animation: petalFall var(--dur, 9s) linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.seed {
+  position: absolute;
+  top: var(--top, 40%);
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.9);
+  box-shadow: 0 0 0 3px rgba(255,255,255,.28);
+  animation: seedFloat var(--dur, 22s) linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+.raindrop {
+  position: absolute;
+  top: 0;
+  width: 2px;
+  height: var(--len, 60px);
+  border-radius: 2px;
+  background: linear-gradient(to bottom, transparent, rgba(214, 238, 250, .8));
+  animation: rainFall var(--dur, 1s) linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+
+/* ==========================================================================
+   6. CUSTOM CURSOR
+
+   The real pointer is replaced by a little star buddy with a trail.
+
+   `cursor: none` is scoped to html.custom-cursor, and script.js only adds
+   that class once the replacement exists and is about to be positioned.
+   So a JS error, a reduced-motion setting or a touch screen all leave the
+   normal pointer alone. Never move this onto plain html or body — you'd
+   risk a page with no pointer at all.
+   ========================================================================== */
+html.custom-cursor,
+html.custom-cursor * { cursor: none !important; }
+
+.cursor {
+  position: fixed;
+  left: 0; top: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 240ms var(--ease);
+}
+
+.cursor.on { opacity: 1; }
+
+/* JS owns this element's transform — position and scale are the same
+   property, so they have to be written together in one line. That's why
+   the ring lives on a child: an animation on transform here would fight
+   that line every single frame. */
+.cursor-buddy { position: relative; display: block; }
+
+.cursor-ring {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 34px; height: 34px;
+  margin: -17px 0 0 -17px;
+  border-radius: 50%;
+  background: conic-gradient(#FF6FB0, #FFD97D, #BCEF6A, #62DDF0, #AE90FF, #FF6FB0);
+  opacity: .9;
+  animation: cursorSpin 3.4s linear infinite;
+}
+
+.cursor-face {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 22px; height: 22px;
+  margin: -11px 0 0 -11px;
+  border-radius: 50%;
+  background: var(--cream);
+  border: 2px solid var(--ink);
+  display: grid;
+  grid-auto-flow: column;
+  place-content: center;
+  gap: 3px;
+}
+
+.cursor-eye {
+  width: 3px; height: 4px;
+  border-radius: 50%;
+  background: var(--ink);
+  animation: blink 4s ease-in-out infinite;
+}
+
+.cursor-dot {
+  position: fixed;
+  left: 0; top: 0;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+}
+
+
+/* ==========================================================================
+   7. NAV
+   ========================================================================== */
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: clamp(.5rem, 2vw, 1.4rem);
+  padding: .7rem clamp(1rem, 3vw, 2rem);
+  background: var(--cream);
+  border-bottom: var(--border);
+}
+
+.nav-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  text-decoration: none;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.06rem;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.nav-logo-mark { font-size: 1.3rem; animation: wobble 4s ease-in-out infinite; }
+
+.nav-clock {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+  padding-left: clamp(.4rem, 1.4vw, .9rem);
+  border-left: 2px solid rgba(var(--ink-rgb), .15);
+}
+
+.nav-clock-time { font-family: var(--font-mono); font-size: .84rem; font-weight: 700; }
+
+.nav-clock-label {
+  font-size: .62rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.nav-links { display: flex; gap: clamp(.4rem, 1.4vw, 1.1rem); list-style: none; margin-left: auto; }
+
+.nav-links a {
+  position: relative;
+  text-decoration: none;
+  font-size: .84rem;
+  font-weight: 500;
+  color: var(--ink-soft);
+  padding: .2rem 0;
+  transition: color 200ms var(--ease);
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: 0;
+  width: 100%; height: 3px;
+  border-radius: 2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 240ms var(--bounce), background var(--tint) var(--ease);
+}
+
+.nav-links a:hover, .nav-links a.active { color: var(--ink); }
+.nav-links a:hover::after, .nav-links a.active::after { transform: scaleX(1); }
+
+.nav-right { display: flex; align-items: center; gap: .45rem; }
+
+.nav-sound, .star-jar {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  font: inherit;
+  font-size: .8rem;
+  font-weight: 600;
+  padding: .34rem .7rem;
+  border: 2px solid var(--ink);
+  border-radius: 100px;
+  background: var(--cream-2);
+  color: var(--ink);
+  cursor: pointer;
+  transition: transform 160ms var(--bounce), background 200ms var(--ease);
+}
+
+.nav-sound:hover, .star-jar:hover { transform: translateY(-2px) rotate(-2deg); }
+.nav-sound:active, .star-jar:active { transform: scale(.95); }
+
+.nav-sound-bars { display: flex; align-items: flex-end; gap: 2px; height: 11px; }
+
+.nav-sound-bars i {
+  display: block;
+  width: 3px; height: 100%;
+  border-radius: 2px;
+  background: currentColor;
+  transform: scaleY(.3);
+  transform-origin: bottom;
+}
+
+.nav-sound[aria-pressed="true"] { background: var(--accent); color: var(--cream); }
+.nav-sound[aria-pressed="true"] i { animation: soundBar .85s ease-in-out infinite; }
+.nav-sound[aria-pressed="true"] i:nth-child(2) { animation-delay: .14s; }
+.nav-sound[aria-pressed="true"] i:nth-child(3) { animation-delay: .28s; }
+
+.star-jar-icon  { font-size: .95rem; }
+.star-jar-count { font-family: var(--font-mono); font-weight: 700; }
+
+
+/* ==========================================================================
+   8. HERO + MARQUEE
+   ========================================================================== */
+.hero {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: var(--page);
+  margin: 0 auto;
+  min-height: min(90vh, 800px);
+  padding: clamp(2rem, 6vh, 5rem) 0 clamp(1.6rem, 4vh, 3rem);
+  color: var(--hero-ink);
+}
+
+/* A soft scrim under the hero text — the one block that sits on sky
+   rather than on paper, so it has to earn its own contrast.
+
+   It's bounded by the hero's own box on purpose. An earlier version was
+   150vmax wide to guarantee soft edges and pushed the document wider than
+   the viewport, which zoomed the whole page out. The gradient fades to
+   nothing well inside these edges anyway. */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: -6% 0 -10% 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(ellipse 62% 50% at 50% 42%,
+    rgba(var(--hero-scrim), .72) 0%,
+    rgba(var(--hero-scrim), .38) 46%,
+    rgba(var(--hero-scrim), 0) 78%);
+}
+
+.hero-kicker {
+  font-family: var(--font-mono);
+  font-size: .68rem;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  opacity: .85;
+  margin-bottom: 1.2rem;
+}
+
+.hero-title {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(2.9rem, 1.6rem + 6.6vw, 7.5rem);
+  line-height: .95;
+  letter-spacing: -.02em;
+  margin-bottom: 1.4rem;
+  text-shadow: 0 3px 0 rgba(var(--hero-scrim), .55), 0 2px 26px rgba(var(--hero-scrim), .8);
+}
+
+.hero-title-break { display: block; height: 0; }
+
+/* each letter bounces one after another */
+.wave-word { display: inline-block; }
+.wave-word span { display: inline-block; animation: letterBounce 2.6s ease-in-out infinite; }
+.wave-word span:nth-child(2) { animation-delay: .12s; }
+.wave-word span:nth-child(3) { animation-delay: .24s; }
+
+/* THE HOLOGRAPHIC WORD (a gotcha worth knowing)
+   .holo clips an animated gradient to the shape of the letters. Getting an
+   outline onto it is genuinely awkward:
+     · text-shadow draws BEHIND the glyph, and the glyph is transparent
+       here — so the shadow shows straight through and you get solid
+       shadow-coloured letters
+     · text-shadow is also INHERITED, so .holo picked up the chunky shadow
+       from .hero-title above and went solid dark on its own
+   The fix is text-shadow: none plus -webkit-text-stroke with
+   paint-order: stroke fill, so the stroke sits UNDER the gradient rather
+   than covering it. Don't remove that text-shadow: none. */
+.holo {
+  display: block;
+  background: linear-gradient(100deg,
+    #FF3D92, #FFC61A, #8FE02B, #14C9E8, #8E5CFF, #FF3D92);
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  text-shadow: none;
+  -webkit-text-stroke: 3.5px var(--ink);
+  paint-order: stroke fill;
+  animation: holoShift 7s linear infinite;
+}
+
+.hero-sub {
+  max-width: 50ch;
+  font-size: clamp(1rem, .95rem + .35vw, 1.16rem);
+  margin-bottom: clamp(1.4rem, 3vh, 2.2rem);
+  text-shadow: 0 1px 14px rgba(var(--hero-scrim), .9);
+}
+
+.hero-buttons { display: flex; gap: .7rem; flex-wrap: wrap; justify-content: center; }
+
+.hero-caption {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.05rem, 1rem + .5vw, 1.4rem);
+  max-width: 32ch;
+  margin-top: clamp(1.4rem, 3.4vh, 2.4rem);
+  text-shadow: 0 1px 16px rgba(var(--hero-scrim), .9);
+  transition: opacity 420ms var(--ease);
+}
+.hero-caption.swap { opacity: 0; }
+
+.scroll-hint {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .4rem;
+  margin-top: auto;
+  padding-top: 2rem;
+  font-family: var(--font-mono);
+  font-size: .64rem;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  opacity: .8;
+}
+.scroll-arrow { font-size: 1.3rem; animation: float 2.6s ease-in-out infinite; }
+
+/* --- the marquee. Content is duplicated in JS so it loops seamlessly:
+       the second copy slides in exactly as the first slides out. --- */
+.marquee {
+  position: relative;
+  z-index: 2;
+  overflow: hidden;
+  padding: .55rem 0;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent));
+  border-block: var(--border);
+  transform: rotate(-1.4deg) scale(1.03);
+  transition: background var(--tint) var(--ease);
+}
+
+.marquee-track { display: flex; width: max-content; animation: marquee 34s linear infinite;
+                 will-change: transform; }
+
+.marquee-track span {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  white-space: nowrap;
+  padding-right: 1.6rem;
+  color: var(--cream);
+  text-shadow: 0 1px 0 rgba(var(--ink-rgb), .35);
+}
+
+
+/* ==========================================================================
+   9. BUTTONS
+   ========================================================================== */
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: .4rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: .96rem;
+  padding: .6rem 1.3rem;
+  border: var(--border);
+  border-radius: 100px;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  text-decoration: none;
+  color: var(--ink);
+  overflow: hidden;
+  transition: transform 160ms var(--bounce), box-shadow 160ms var(--ease);
+}
+
+.btn-pink  { background: var(--accent); color: var(--cream); }
+.btn-lilac { background: var(--accent-2); }
+.btn-ghost { background: var(--cream-2); }
+
+.btn:hover  { transform: translate(-2px, -3px); box-shadow: 9px 10px 0 var(--ink); }
+.btn:active { transform: translate(2px, 3px) scale(.98); box-shadow: 2px 2px 0 var(--ink); }
+
+/* a glossy highlight sweeping across on hover */
+.btn::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -60%;
+  width: 40%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.5), transparent);
+  transform: skewX(-18deg);
+  pointer-events: none;
+}
+.btn:hover::after { animation: shimmer 700ms var(--ease); }
+
+.btn-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,.6);
+  transform: scale(0);
+  pointer-events: none;
+  animation: ripple 620ms var(--ease) forwards;
+}
+
+
+/* ==========================================================================
+   10. FACTS
+   ========================================================================== */
+.fact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+  gap: clamp(.7rem, 1.6vw, 1.1rem);
+}
+
+/* A flip card is one button with two faces. The button holds the
+   perspective; the faces are stacked and rotated. */
+.fact-card {
+  position: relative;
+  min-height: 210px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  perspective: 1200px;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+}
+
+.fact-front, .fact-back {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: .4rem;
+  padding: 1.3rem;
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+  backface-visibility: hidden;
+  transition: transform 640ms var(--ease), box-shadow 200ms var(--ease);
+}
+
+.fact-front { align-items: center; text-align: center; background: var(--cream-2); }
+.fact-back  { transform: rotateY(180deg); background: var(--accent-2); font-size: .94rem; }
+
+/* The front is a stack of three things, so the flex column above suits it.
+   The back is a paragraph, and a flex container makes every run of text and
+   every inline element its own item - which put "way more air" on a line of
+   its own with a gap above and below it. So the back gets exactly ONE
+   child, and the prose flows normally inside it. */
+.fact-text {
+  line-height: 1.5;
+  text-wrap: pretty;
+}
+
+.fact-card.flipped .fact-front { transform: rotateY(-180deg); }
+.fact-card.flipped .fact-back  { transform: rotateY(0); }
+
+.fact-card:hover:not(.flipped) .fact-front {
+  transform: translate(-2px,-4px) rotate(-1.5deg);
+  box-shadow: var(--shadow);
+}
+
+.fact-emoji { font-size: 2.6rem; line-height: 1; animation: float 3.4s ease-in-out infinite; }
+.fact-label { font-family: var(--font-display); font-weight: 800; font-size: 1.2rem; }
+
+.fact-hint {
+  font-family: var(--font-mono);
+  font-size: .6rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+
+/* ==========================================================================
+   11. RIDDLES
+   ========================================================================== */
+.riddle-progress { display: flex; align-items: center; gap: .8rem; margin-bottom: 1.6rem; }
+
+.riddle-progress-label, .riddle-progress-count {
+  font-family: var(--font-mono);
+  font-size: .68rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
+
+.riddle-bar {
+  flex: 1;
+  height: 12px;
+  border: 2px solid var(--ink);
+  border-radius: 100px;
+  background: var(--cream-2);
+  overflow: hidden;
+}
+
+.riddle-bar-fill {
+  width: 0;
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  transition: width 700ms var(--bounce), background var(--tint) var(--ease);
+}
+
+.riddle-grid {
+  display: grid;
+  /* min(320px, 100%) so a narrow phone can't force a track wider than the
+     screen — grid items refuse to shrink below min-content otherwise, and
+     the card gets silently clipped */
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+  gap: clamp(.8rem, 1.8vw, 1.2rem);
+}
+
+.riddle {
+  min-width: 0;
+  padding: 1.3rem;
+  background: var(--cream-2);
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+  transition: background 300ms var(--ease);
+}
+
+.riddle.done { background: color-mix(in srgb, var(--accent-2) 55%, var(--cream)); }
+.riddle.just-solved { animation: popCorrect 500ms var(--bounce); }
+
+.riddle-head { display: flex; align-items: center; gap: .6rem; margin-bottom: .7rem; }
+
+.riddle-num {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--ink-faint);
+  transition: color 300ms var(--ease);
+}
+.riddle.done .riddle-num { color: var(--accent); }
+
+.riddle-tag {
+  font-family: var(--font-mono);
+  font-size: .58rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  padding: .16rem .5rem;
+  border: 2px solid var(--ink);
+  border-radius: 100px;
+}
+.tag-easy   { background: #BCEF6A; }
+.tag-medium { background: #FFD97D; }
+.tag-hard   { background: #FF9FC0; }
+
+.riddle-q { font-size: .98rem; line-height: 1.55; margin-bottom: 1rem; min-height: 5.2em; }
+
+.riddle-row { display: flex; gap: .4rem; margin-bottom: .6rem; }
+
+.riddle-input {
+  font: inherit;
+  font-size: .9rem;
+  flex: 1;
+  min-width: 0;
+  padding: .5rem .9rem;
+  border: 2px solid var(--ink);
+  border-radius: 100px;
+  background: var(--cream);
+  color: var(--ink);
+}
+.riddle-input:focus { outline: 0; box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 35%, transparent); }
+
+.riddle-check {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: .86rem;
+  padding: .5rem 1rem;
+  border: 2px solid var(--ink);
+  border-radius: 100px;
+  background: var(--accent);
+  color: var(--cream);
+  cursor: pointer;
+  transition: transform 160ms var(--bounce);
+}
+.riddle-check:hover  { transform: translateY(-2px); }
+.riddle-check:active { transform: scale(.95); }
+
+.riddle-actions { display: flex; gap: .8rem; }
+
+.riddle-hint-btn, .riddle-reveal-btn {
+  font: inherit;
+  font-size: .76rem;
+  border: 0;
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.riddle-hint-btn:hover, .riddle-reveal-btn:hover { color: var(--accent); }
+
+.riddle-feedback { font-size: .84rem; min-height: 1.5em; margin-top: .5rem; color: var(--ink-soft); }
+.riddle-feedback.good { color: var(--ink); font-weight: 700; }
+.riddle.done .riddle-row, .riddle.done .riddle-actions { display: none; }
+
+
+/* ==========================================================================
+   12. GAME
+   ========================================================================== */
+.game-frame {
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  background: var(--cream-2);
+  overflow: hidden;
+}
+
+.game-hud {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  flex-wrap: wrap;
+  padding: .7rem .9rem;
+  border-bottom: var(--border);
+}
+
+.hud-pill {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: .76rem;
+  padding: .24rem .62rem;
+  border: 2px solid var(--ink);
+  border-radius: 100px;
+  background: var(--cream);
+  white-space: nowrap;
+}
+
+.hud-combo { transition: background 200ms var(--ease); }
+.hud-combo.hot  { background: var(--accent); color: var(--cream); }
+.hud-combo.kick { animation: jelly 420ms var(--bounce); }
+
+.hud-lives { letter-spacing: -.06em; }
+.hud-spacer { flex: 1; }
+
+.hud-btn {
+  font-size: .9rem;
+  width: 2.1rem; height: 2.1rem;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--cream);
+  cursor: pointer;
+  transition: transform 160ms var(--bounce);
+}
+.hud-btn:hover { transform: translateY(-2px) rotate(-8deg); }
+
+.powerup-bar {
+  display: flex;
+  gap: .4rem;
+  flex-wrap: wrap;
+  padding: 0 .9rem;
+  transition: padding 200ms var(--ease);
+}
+.powerup-bar:not(:empty) { padding: .5rem .9rem; }
+
+.powerup-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  font-family: var(--font-mono);
+  font-size: .68rem;
+  font-weight: 700;
+  padding: .2rem .6rem;
+  border: 2px solid var(--ink);
+  border-radius: 100px;
+  background: var(--accent-2);
+  overflow: hidden;
+  animation: popIn 300ms var(--bounce) both;
+}
+
+/* the shrinking countdown bar behind the label */
+.powerup-chip-bar {
+  position: absolute;
+  left: 0; bottom: 0;
+  height: 3px;
+  background: var(--ink);
+}
+
+.canvas-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 900 / 440;
+  background: linear-gradient(to bottom, var(--sky-2), var(--sky-4));
+  transition: background var(--tint) var(--ease);
+}
+.canvas-wrap.shake { animation: shake 380ms ease-in-out; }
+
+#gameCanvas { display: block; width: 100%; height: 100%; }
+
+.level-banner {
+  position: absolute;
+  left: 50%; top: 42%;
+  z-index: 4;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.6rem, 4vw, 2.6rem);
+  padding: .3rem 1.2rem;
+  border: var(--border);
+  border-radius: 100px;
+  background: var(--accent-2);
+  box-shadow: var(--shadow);
+  transform: translate(-50%,-50%);
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+}
+.level-banner.show { animation: bannerFlash 1500ms var(--ease); }
+
+.game-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .7rem;
+  text-align: center;
+  padding: 1.4rem;
+  background: color-mix(in srgb, var(--cream) 93%, transparent);
+  transition: opacity 340ms var(--ease), visibility 340ms var(--ease);
+}
+.game-overlay.hidden { opacity: 0; visibility: hidden; }
+
+.overlay-title { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.4rem, 1.2rem + 1.2vw, 2.1rem); }
+.overlay-text  { max-width: 46ch; font-size: .92rem; color: var(--ink-soft); }
+
+.powerup-legend {
+  display: flex;
+  gap: .4rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: .66rem;
+}
+.powerup-legend span {
+  padding: .18rem .5rem;
+  border: 2px solid var(--ink);
+  border-radius: 100px;
+  background: var(--cream-2);
+}
+
+.overlay-foot {
+  font-family: var(--font-mono);
+  font-size: .62rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.game-footnote { padding: .7rem .9rem; font-size: .78rem; color: var(--ink-soft); border-top: var(--border); }
+
+
+/* ==========================================================================
+   13. SONNET
+   ========================================================================== */
+.sonnet {
+  max-width: 34rem;
+  margin: 0 0 1.8rem;
+  padding: clamp(1.3rem, 3vw, 2.2rem);
+  background: var(--cream-2);
+  border: var(--border);
+  border-left: 10px solid var(--accent);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+  transition: border-color var(--tint) var(--ease);
+}
+
+.sonnet-body p {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: clamp(1rem, .95rem + .4vw, 1.18rem);
+  line-height: 1.6;
+}
+
+/* the volta — the poem turns at line 9, and so does the type */
+.sonnet-body p:nth-child(n+9) { font-style: italic; padding-left: 1.2rem; }
+.sonnet-body p:nth-child(9)   { margin-top: .8rem; }
+
+.sonnet-credit {
+  font-family: var(--font-mono);
+  font-size: .68rem;
+  color: var(--ink-faint);
+  margin-top: 1.2rem;
+  padding-top: .9rem;
+  border-top: 2px dashed rgba(var(--ink-rgb), .2);
+}
+
+.sonnet-notes {
+  max-width: 60ch;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: flex-start;
+  color: var(--ink-soft);
+}
+
+
+/* ==========================================================================
+   14. LAST PAGE + FOOTER
+   ========================================================================== */
+.lastpage {
+  position: relative;
+  padding: clamp(1.4rem, 3.4vw, 2.4rem);
+  background: var(--cream-2);
+  border: var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+}
+
+.lastpage-seal {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .6rem;
+  text-align: center;
+  padding: 1.4rem;
+  background: var(--cream);
+}
+
+.lastpage:not(.locked) .lastpage-seal { animation: sealFade 800ms var(--ease) forwards; pointer-events: none; }
+
+.lastpage-lock { font-size: 2.2rem; animation: wobble 3s ease-in-out infinite; }
+
+/* One line of prose, so a plain block - it was a flex column, which broke
+   it into four stacked lines the same way the fact cards broke. */
+.lastpage-hint {
+  font-family: var(--font-mono);
+  font-size: .74rem;
+  line-height: 1.7;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+.lastpage-count { color: var(--accent); font-weight: 700; margin-left: .5em; }
+
+.lastpage-body {
+  display: flex;
+  flex-direction: column;
+  gap: .9rem;
+  max-width: 58ch;
+  filter: blur(7px);
+  opacity: .3;
+  transition: filter 800ms var(--ease), opacity 800ms var(--ease);
+}
+.lastpage:not(.locked) .lastpage-body { filter: none; opacity: 1; }
+
+.lastpage-time {
+  font-family: var(--font-mono);
+  font-size: .66rem;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.lastpage-last { font-family: var(--font-display); font-weight: 700; font-size: 1.14rem; }
+
+.footer {
+  margin-top: clamp(1.8rem, 4vw, 3rem);
+  padding-top: 1.4rem;
+  border-top: 2px dashed rgba(var(--ink-rgb), .2);
+  text-align: center;
+}
+
+.footer-small { font-family: var(--font-mono); font-size: .72rem; color: var(--ink-faint); margin-top: .4rem; }
+
+.footer-reset {
+  font: inherit;
+  font-size: inherit;
+  border: 0;
+  background: transparent;
+  color: var(--ink-faint);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.footer-reset:hover { color: var(--accent); }
+
+
+/* ==========================================================================
+   15. TOAST + CONFETTI + REVEAL
+   ========================================================================== */
+/* Hung off the bottom of the sticky bar (see index.html), so it clears the
+   bar at whatever height the bar happens to be, and never lands on the
+   panel - which fires every toast there is. */
+.toast {
+  position: absolute;
+  left: 50%;
+  top: calc(100% + .55rem);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .6rem 1.2rem;
+  border: var(--border);
+  border-radius: 100px;
+  background: var(--cream);
+  box-shadow: var(--shadow);
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, -24px);
+  pointer-events: none;
+}
+.toast.show  { visibility: visible; animation: toastIn 2700ms var(--ease) forwards; }
+.toast-emoji { font-size: 1.15rem; }
+.toast-text  { font-family: var(--font-display); font-weight: 700; font-size: .92rem; }
+
+.confetti-piece {
+  position: fixed;
+  top: -12vh;
+  z-index: 250;
+  width: 9px; height: 9px;
+  border: 2px solid var(--ink);
+  pointer-events: none;
+  animation: confettiFall var(--cd, 3s) var(--ease) forwards;
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition: opacity 700ms var(--ease), transform 700ms var(--bounce);
+}
+.reveal.in { opacity: 1; transform: none; }
+
+
+/* ==========================================================================
+   15b. THE SEASON LAYER
+
+   Same shape as the critters: everything is built once, and CSS shows the
+   layers this season calls for. Anything not on screen is paused at the
+   bottom of the file, so three of these four cost nothing at any moment.
+   ========================================================================== */
+
+.seasons { position: absolute; inset: 0; pointer-events: none; }
+
+/* Listed by class rather than as `.seasons > div`. The snowman is also a
+   direct child here, and `.seasons > div` is a class-plus-type selector,
+   so it outweighed `.snowman`'s own left/bottom and stretched him to
+   inset:0 - which parked him in the top-left corner of the sky. */
+.blossom, .leaffall, .snow, .treats {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity var(--tint) var(--ease);
+}
+
+[data-season="spring"] .blossom  { opacity: 1; }
+[data-season="autumn"] .leaffall { opacity: 1; }
+[data-season="winter"] .snow     { opacity: 1; }
+[data-season="summer"] .treats   { opacity: 1; }
+
+
+/* ---------- 🌸 spring: blossom ----------
+   Blossom does not fall so much as get carried. Long slow drift sideways,
+   and it turns over as it goes. */
+.bloss {
+  position: absolute;
+  top: 0;
+  left: var(--left, 20%);
+  width: 9px; height: 9px;
+  background: var(--bloss, #FFC2DE);
+  border-radius: 50% 8% 50% 50%;
+  animation: blossomDrift var(--dur, 15s) linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+
+/* ---------- 🍂 autumn: leaves ----------
+   A falling leaf swings. It is a flat thing in moving air, so it stalls,
+   tips, and slides off sideways - which is a rotation on two axes at once,
+   not a straight line down. */
+.fleaf {
+  position: absolute;
+  top: 0;
+  left: var(--left, 20%);
+  width: 13px; height: 10px;
+  background: var(--fl, #E07B32);
+  border-radius: 60% 10% 60% 10%;
+  animation: leafTumble var(--dur, 11s) linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+
+/* ---------- ❄ winter: snow ---------- */
+.flake {
+  position: absolute;
+  top: 0;
+  left: var(--left, 20%);
+  width: var(--size, 6px); height: var(--size, 6px);
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 5px 1px rgba(255,255,255,.7);
+  animation: snowDrift var(--dur, 13s) linear infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+
+/* ---------- 🍦 summer: something cold ----------
+   These sit ON the meadow rather than falling through the sky, so they get
+   a bottom offset and a lazy bob instead of a fall. */
+.treat {
+  position: absolute;
+  bottom: var(--bottom, 3%);
+  left: var(--left, 20%);
+  font-size: var(--size, 26px);
+  line-height: 1;
+  filter: drop-shadow(0 3px 0 rgba(0,0,0,.16));
+  animation: treatBob var(--dur, 3.4s) ease-in-out infinite;
+  animation-delay: var(--delay, 0s);
+}
+
+
+/* ---------- ⛄ the snowman ----------
+   Drawn rather than dropped in as an emoji, because everything else in this
+   valley is drawn. Three stacked circles, and he leans very slightly as if
+   he is about to say something. */
+.snowman {
+  position: absolute;
+  left: 13%;
+  bottom: 2.5%;
+  width: 64px; height: 92px;
+  opacity: 0;
+  transform-origin: 50% 100%;
+  transition: opacity var(--tint) var(--ease);
+}
+
+[data-season="winter"] .snowman {
+  opacity: 1;
+  animation: snowmanBob 5.5s ease-in-out infinite;
+}
+
+.snowman span, .snowman i { position: absolute; }
+
+.snowman-base {
+  width: 54px; height: 46px;
+  left: 5px; bottom: 0;
+  background: #FBFEFF;
+  border: 3px solid #2A3A52;
+  border-radius: 50%;
+}
+
+.snowman-mid {
+  width: 42px; height: 36px;
+  left: 11px; bottom: 34px;
+  background: #FBFEFF;
+  border: 3px solid #2A3A52;
+  border-radius: 50%;
+}
+
+.snowman-head {
+  width: 32px; height: 30px;
+  left: 16px; bottom: 62px;
+  background: #FBFEFF;
+  border: 3px solid #2A3A52;
+  border-radius: 50%;
+}
+
+.snowman-eye {
+  width: 4px; height: 5px;
+  top: 9px;
+  background: #2A3A52;
+  border-radius: 50%;
+}
+.snowman-eye-l { left: 7px; }
+.snowman-eye-r { right: 8px; }
+
+/* the carrot */
+.snowman-nose {
+  left: 12px; top: 15px;
+  width: 0; height: 0;
+  border-top: 3px solid transparent;
+  border-bottom: 3px solid transparent;
+  border-left: 11px solid #FF8A3D;
+}
+
+.snowman-scarf {
+  width: 40px; height: 8px;
+  left: 12px; bottom: 60px;
+  background: var(--accent, #FF5FA2);
+  border: 2px solid #2A3A52;
+  border-radius: 5px;
+}
+
+.snowman-arm {
+  width: 20px; height: 3px;
+  bottom: 48px;
+  background: #6E4429;
+  border-radius: 2px;
+}
+.snowman-arm-l { left: -8px;  transform: rotate(-24deg); }
+.snowman-arm-r { right: -8px; transform: rotate(24deg);  }
+
+
+/* ---------- winter thins the trees out ----------
+   Bare branches, not green ones. The leaves stay in the DOM and just pull
+   in and fade, which keeps the change smooth in both directions. */
+[data-season="winter"] .tree-leaf {
+  transform: scale(.72);
+  opacity: .82;
+}
+
+
+/* ==========================================================================
+   15c. SEASON KEYFRAMES
+   ========================================================================== */
+
+@keyframes blossomDrift {
+  0%   { transform: translate3d(0, -10vh, 0) rotate(0deg);      opacity: 0; }
+  12%  { opacity: .95; }
+  100% { transform: translate3d(26vw, 112vh, 0) rotate(680deg); opacity: 0; }
+}
+
+@keyframes leafTumble {
+  0%   { transform: translate3d(0, -10vh, 0)    rotate(0deg)   scaleX(1);  opacity: 0; }
+  10%  { opacity: 1; }
+  35%  { transform: translate3d(-9vw, 30vh, 0)  rotate(220deg) scaleX(-1); }
+  70%  { transform: translate3d(7vw, 68vh, 0)   rotate(430deg) scaleX(1);  }
+  100% { transform: translate3d(-5vw, 112vh, 0) rotate(700deg) scaleX(-1); opacity: 0; }
+}
+
+@keyframes snowDrift {
+  0%   { transform: translate3d(0, -10vh, 0);    opacity: 0; }
+  10%  { opacity: 1; }
+  50%  { transform: translate3d(6vw, 52vh, 0); }
+  100% { transform: translate3d(-3vw, 112vh, 0); opacity: .5; }
+}
+
+@keyframes lampFlicker {
+  0%, 100% { opacity: .78; }
+  50%      { opacity: 1; }
+}
+
+@keyframes owlGlow {
+  0%, 100% { opacity: 1; }
+  46%      { opacity: 1; }
+  /* a blink: fast, and only now and then */
+  50%      { opacity: .12; }
+  54%      { opacity: 1; }
+}
+
+@keyframes treatBob {
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50%      { transform: translateY(-7px) rotate(3deg); }
+}
+
+@keyframes snowmanBob {
+  0%, 100% { transform: rotate(-1.6deg); }
+  50%      { transform: rotate(1.6deg); }
+}
+
+
+/* ---------- ⏸ PAUSE WHAT ISN'T ON SCREEN ----------
+   Hiding a layer with opacity doesn't stop it running — a faded-out
+   raindrop still burns its slice of every frame, and on any given day most
+   of these layers are off. The elements stay in the DOM so the fade still
+   works; they just don't animate while invisible.
+
+   Two things about the selectors. They have to sit after the critter rules
+   above, because those use the `animation` shorthand and a shorthand resets
+   every longhand it covers — including this one. And they're prefixed with
+   .world to reach two classes, so they can outrank `.star.tw`. */
+.world .world-stars *,
+.world .birds *, .world .butterflies *, .world .fireflies *,
+.world .petals *, .world .seeds *, .world .rain *,
+.world .blossom *, .world .leaffall *, .world .snow *, .world .treats *,
+.world .owl *, .london *, .london *::after {
+  animation-play-state: paused;
+}
+
+[data-time="sunrise"]    .world .world-stars *,
+[data-time="night"]      .world .world-stars *,
+[data-time="sunrise"]    .world .birds *,
+[data-time="day"]        .world .birds *,
+[data-time="sunset"]     .world .birds *,
+[data-time="poem"]       .world .birds *,
+[data-time="sunrise"]    .world .butterflies *,
+[data-time="day"]        .world .butterflies *,
+[data-time="night"]      .world .fireflies *,
+[data-weather="rain"]    .world .rain *,
+[data-weather="rain"]    .world .petals *,
+[data-weather="breeze"]  .world .seeds *,
+[data-season="spring"] .world .blossom *,
+[data-season="autumn"] .world .leaffall *,
+[data-season="winter"] .world .snow *,
+[data-season="summer"] .world .treats *,
+[data-time="night"]      .world .owl *,
+[data-time="poem"]       .london *,
+[data-time="poem"]       .london *::after {
+  animation-play-state: running;
+}
+
+
+/* ==========================================================================
+   15d. THE PANEL
+
+   Every control on the site lives in here now - the picker section and the
+   mixer section that used to repeat it further down the page are gone. That
+   makes this the only way to change anything, which raises the bar for it:
+   every chip is labelled, every slider has its number, and nothing is more
+   than one scroll of the panel away.
+
+   It floats over the page, because there is no width at which a fixed panel
+   and a centred column both fit. So it is translucent with the valley
+   blurred behind it, to look like it is floating rather than like the
+   layout broke, and it folds away entirely.
+   ========================================================================== */
+
+.dock {
+  position: fixed;
+  right: clamp(8px, 1.4vw, 18px);
+  bottom: clamp(8px, 1.4vw, 18px);
+  z-index: 180;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: .4rem;
+  width: min(424px, calc(100vw - 16px));
+  font-family: var(--font-body);
+}
+
+/* ---------- the handle ---------- */
+.dock-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  padding: .46rem .78rem;
+  font: inherit;
+  font-weight: 700;
+  font-size: .84rem;
+  color: var(--ink);
+  background: var(--cream);
+  border: var(--border);
+  border-radius: 999px;
+  box-shadow: 4px 4px 0 var(--ink);
+  cursor: pointer;
+  transition: transform 200ms var(--bounce), box-shadow 200ms var(--ease);
+}
+
+.dock-toggle:hover { transform: translate(-1px, -2px); box-shadow: 5px 6px 0 var(--ink); }
+.dock-toggle:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+.dock-toggle-icon { font-size: 1rem; line-height: 1; }
+
+.dock-toggle-chev {
+  font-size: 1.1rem;
+  line-height: 1;
+  transform: rotate(-90deg);
+  transition: transform 260ms var(--ease);
+}
+.dock.closed .dock-toggle-chev { transform: rotate(90deg); }
+
+/* When the hero button points at it, say so rather than hoping it is
+   noticed - it is the only way in now. */
+.dock.nudge .dock-toggle {
+  animation: dockNudge 900ms var(--bounce) 2;
+  background: var(--accent);
+  color: var(--cream);
+}
+
+@keyframes dockNudge {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  30%      { transform: translate(-2px, -5px) rotate(-3deg); }
+  65%      { transform: translate(-1px, -2px) rotate(2deg); }
+}
+
+/* ---------- the body ---------- */
+/* Two columns: the three dials down the left, the sound down the right.
+   As one column it came to 649px, which inner-scrolls on any laptop - and a
+   scrollbar inside the only control surface on the site is exactly how
+   somebody never finds out the seasons exist. Wider and shorter fits whole
+   on every screen, and covers less of the valley into the bargain. */
+.dock-body {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-content: start;
+  gap: .55rem .8rem;
+  padding: .8rem .75rem;
+  background: color-mix(in srgb, var(--cream) 90%, transparent);
+  -webkit-backdrop-filter: blur(10px) saturate(1.25);
+  backdrop-filter: blur(10px) saturate(1.25);
+  border: var(--border);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
+  max-height: min(76vh, 660px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  transition: max-height 340ms var(--ease), opacity 240ms var(--ease),
+              padding 340ms var(--ease);
+}
+
+.dock.closed .dock-body {
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  border-width: 0;
+}
+
+/* ---------- what you are looking at, in words ---------- */
+.dock-now {
+  grid-column: 1 / -1;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.02rem;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--ink);
+  padding-bottom: .5rem;
+  border-bottom: 2px dashed rgba(var(--ink-rgb), .2);
+}
+
+.dock-group { display: flex; flex-direction: column; gap: .34rem; min-width: 0; }
+
+/* The dials stack in the left column, the sound takes the whole right one.
+   Spelled out rather than left to auto-placement, because auto-placement
+   would put the sound under the hour and leave a hole. */
+.dock-group          { grid-column: 1; }
+.dock-group-sound    { grid-column: 2; grid-row: 2 / span 3; }
+
+.dock-label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .4rem;
+  font-family: var(--font-mono);
+  font-size: .62rem;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.dock-clock {
+  font-family: var(--font-mono);
+  font-size: .76rem;
+  letter-spacing: .04em;
+  color: var(--ink);
+}
+
+.dock-note {
+  font-size: .68rem;
+  line-height: 1.4;
+  color: var(--ink-soft);
+}
+
+/* ---------- the chips: four across, each one named ----------
+   They were emoji-only while the labelled cards still existed further down
+   the page. Now that they are the only control, they say what they are. */
+.dock-chips {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: .28rem;
+}
+
+.dock-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .1rem;
+  padding: .34rem .1rem .3rem;
+  min-width: 0;
+  font: inherit;
+  color: var(--ink);
+  background: var(--cream-2);
+  border: 2.5px solid var(--ink);
+  border-radius: 13px;
+  cursor: pointer;
+  transition: transform 200ms var(--bounce), background 260ms var(--ease),
+              box-shadow 200ms var(--ease), color 260ms var(--ease);
+}
+
+.dock-chip-icon { font-size: 1.05rem; line-height: 1.1; }
+
+.dock-chip-name {
+  font-size: .53rem;
+  line-height: 1.1;
+  letter-spacing: .01em;
+  font-weight: 700;
+  text-align: center;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dock-chip:hover { transform: translateY(-2px); }
+.dock-chip:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.dock-chip[aria-selected="true"] {
+  background: var(--ink);
+  color: var(--cream);
+  transform: translateY(-2px);
+  box-shadow: 0 3px 0 rgba(var(--ink-rgb), .45);
+}
+.dock-chip[aria-selected="true"] .dock-chip-icon { animation: jelly 700ms var(--bounce); }
+
+/* ---------- the real-time switch ---------- */
+.dock-live {
+  margin-top: .1rem;
+  padding: .38rem .6rem;
+  font: inherit;
+  font-weight: 700;
+  font-size: .72rem;
+  color: var(--ink);
+  background: var(--cream-2);
+  border: 2.5px solid var(--ink);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 240ms var(--ease), color 240ms var(--ease),
+              transform 200ms var(--bounce);
+}
+.dock-live:hover { transform: translateY(-2px); }
+.dock-live:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.dock-live[aria-pressed="true"] { background: var(--ink); color: var(--cream); }
+
+/* While the clock is driving, the hour chips are still usable - touching one
+   just takes back control - but it should be visible that something else is
+   holding the wheel. */
+html.live-time #dockTime { opacity: .7; }
+
+/* ---------- the sliders ---------- */
+.dock-range {
+  -webkit-appearance: none;
+  appearance: none;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: 20px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.dock-range:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+
+.dock-range::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 5px;
+  border: 2px solid var(--ink);
+  background: var(--cream-2);
+}
+.dock-range::-moz-range-track {
+  height: 6px;
+  border-radius: 5px;
+  border: 2px solid var(--ink);
+  background: var(--cream-2);
+}
+
+.dock-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 17px; height: 17px;
+  margin-top: -7.5px;
+  border-radius: 50%;
+  border: 2.5px solid var(--ink);
+  background: var(--accent);
+  transition: transform 160ms var(--bounce);
+}
+.dock-range::-moz-range-thumb {
+  width: 17px; height: 17px;
+  border-radius: 50%;
+  border: 2.5px solid var(--ink);
+  background: var(--accent);
+}
+.dock-range:hover::-webkit-slider-thumb { transform: scale(1.18); }
+
+/* The sun slider gets an actual sun for a thumb, on a track that runs from
+   midnight through noon and back - because that is what you are dragging. */
+.dock-range-sun::-webkit-slider-thumb {
+  width: 21px; height: 21px;
+  margin-top: -9.5px;
+  background: radial-gradient(circle at 38% 34%, var(--sun-core, #FFF6D8), var(--sun-glow, #FFD34E));
+}
+.dock-range-sun::-moz-range-thumb {
+  width: 21px; height: 21px;
+  background: radial-gradient(circle at 38% 34%, var(--sun-core, #FFF6D8), var(--sun-glow, #FFD34E));
+}
+.dock-range-sun::-webkit-slider-runnable-track {
+  background: linear-gradient(to right, #2B1F52, #8D6FC4 22%, #FFD9A8 38%,
+                              #BFE7FA 52%, #FFB35C 74%, #2B1F52);
+}
+.dock-range-sun::-moz-range-track {
+  background: linear-gradient(to right, #2B1F52, #8D6FC4 22%, #FFD9A8 38%,
+                              #BFE7FA 52%, #FFB35C 74%, #2B1F52);
+}
+
+/* ---------- the four channels ---------- */
+.dock-group-sound { gap: .12rem; }
+
+.dock-mini {
+  display: grid;
+  grid-template-columns: 1.5rem 1fr 1.7rem;
+  align-items: center;
+  gap: .3rem;
+  cursor: pointer;
+}
+
+.dock-mini-icon {
+  font-size: .92rem;
+  line-height: 1;
+  text-align: center;
+  filter: grayscale(1);
+  opacity: .45;
+  transition: filter 300ms var(--ease), opacity 300ms var(--ease);
+}
+
+/* a channel that is actually making a sound lights up */
+.dock-mini.live .dock-mini-icon { filter: none; opacity: 1; }
+
+.dock-mini-val {
+  font-family: var(--font-mono);
+  font-size: .66rem;
+  text-align: right;
+  color: var(--ink-soft);
+}
+
+.dock-mini-master {
+  margin-top: .3rem;
+  padding-top: .4rem;
+  border-top: 2px dashed rgba(var(--ink-rgb), .22);
+}
+.dock-mini-master .dock-mini-icon { filter: none; opacity: .8; }
+
+/* ---------- the ready-made mixes ---------- */
+.dock-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .25rem;
+  margin-top: .45rem;
+}
+
+.preset-btn {
+  flex: 1 1 auto;
+  padding: .3rem .42rem;
+  font: inherit;
+  font-size: .62rem;
+  font-weight: 700;
+  white-space: nowrap;
+  color: var(--ink);
+  background: var(--cream-2);
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: transform 180ms var(--bounce), background 220ms var(--ease);
+}
+.preset-btn:hover { transform: translateY(-2px); background: var(--accent-2); }
+.preset-btn:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.preset-btn-quiet { background: var(--cream); }
+
+
+/* ==========================================================================
+   15e. THE ABOUT PAGE
+   ========================================================================== */
+
+.about-quote {
+  position: relative;
+  max-width: 44rem;
+  margin: 0 auto 2.2rem;
+  padding: 2rem 1.6rem 1.5rem;
+  text-align: center;
+  background: var(--cream-2);
+  border: var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+}
+
+/* an enormous opening quote mark, sitting over the top edge */
+.about-quote::before {
+  content: '\201C';
+  position: absolute;
+  top: -.42em;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-display);
+  font-size: 5rem;
+  line-height: 1;
+  color: var(--accent);
+  transition: color var(--tint) var(--ease);
+}
+
+.about-quote-big {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: clamp(1.45rem, 4.2vw, 2.1rem);
+  line-height: 1.2;
+  color: var(--ink);
+}
+
+.about-quote-small {
+  margin-top: .8rem;
+  font-size: clamp(.98rem, 2.2vw, 1.1rem);
+  line-height: 1.55;
+  font-style: italic;
+  color: var(--ink-soft);
+}
+
+.about-quote figcaption {
+  margin-top: 1rem;
+  font-family: var(--font-mono);
+  font-size: .7rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.about-body {
+  max-width: 40rem;
+  margin: 0 auto;
+}
+
+.about-para {
+  font-size: clamp(1rem, 2.1vw, 1.1rem);
+  line-height: 1.85;
+  color: var(--ink);
+}
+
+.about-para + .about-para { margin-top: 1.1rem; }
+
+/* One drop cap, on the first paragraph only. */
+.about-para:first-of-type::first-letter {
+  float: left;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 3.3em;
+  line-height: .8;
+  margin: .06em .1em 0 0;
+  color: var(--accent);
+  transition: color var(--tint) var(--ease);
+}
+
+.about-scenes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: .55rem;
+  max-width: 44rem;
+  margin: 2rem auto 0;
+}
+
+.about-scenes-label {
+  width: 100%;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: .68rem;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.about-scene { font-size: .84rem; padding: .5rem .9rem; }
+
+
+/* ==========================================================================
+   16. MOBILE
+   ========================================================================== */
+
+@media (max-width: 900px) {
+  .nav-links { display: none; }
+  .nav-clock { margin-left: auto; }
+}
+
+@media (max-width: 640px) {
+  .section {
+    width: 94vw;
+    padding: 1.5rem 1.1rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+
+  .hero { width: 92vw; min-height: auto; padding-top: 1.6rem; }
+  .hero-title { text-shadow: 0 2px 0 rgba(var(--hero-scrim), .55); }
+  .holo { -webkit-text-stroke-width: 2px; }
+
+  /* wide-and-short is unplayable on a narrow screen */
+  .canvas-wrap { aspect-ratio: 3 / 4; }
+
+  .sun-rays-long   { width: 1000px; height: 1000px; margin: -500px 0 0 -500px; }
+  .sun-rays-mid    { width: 620px;  height: 620px;  margin: -310px 0 0 -310px; }
+  .sun-rays-spokes { width: 340px;  height: 340px;  margin: -170px 0 0 -170px; }
+
+  .rainbow { width: 130vw; height: 66vw; margin-left: -65vw; }
+
+  /* The panel goes full width along the bottom, where it covers the least
+     of the valley, and starts folded so it is never in the way. */
+  .dock {
+    left: 8px;
+    right: 8px;
+    width: auto;
+    align-items: stretch;
+  }
+  .dock-toggle { align-self: flex-end; }
+
+  /* Same two columns, bigger tap targets inside them. */
+  .dock-body { gap: .5rem .6rem; max-height: 62vh; }
+  .dock-chip { padding: .44rem .1rem .4rem; }
+  .dock-chip-icon { font-size: 1.16rem; }
+  .dock-chip-name { font-size: .56rem; }
+  .dock-range { height: 26px; }
+  .dock-range::-webkit-slider-thumb { width: 21px; height: 21px; margin-top: -9.5px; }
+  .dock-range::-moz-range-thumb { width: 21px; height: 21px; }
+  .preset-btn { font-size: .66rem; padding: .38rem .45rem; }
+}
+
+/* Two columns on a narrow phone leaves each chip about 39px, and "daytime"
+   does not fit in 39px at the size above - it was ellipsising to "dayti...".
+   Rather than drop the names (the icons alone are a guessing game) they get
+   smaller and the padding goes, which is enough for the longest of them. */
+@media (max-width: 440px) {
+  .dock-chips { gap: .22rem; }
+  .dock-chip { padding-left: 1px; padding-right: 1px; }
+  .dock-chip-name { font-size: .5rem; letter-spacing: 0; }
+
+  .about-quote { padding: 1.8rem 1.1rem 1.3rem; }
+  .hills   { height: 22vh; min-height: 140px; }
+}
+
+
+/* ==========================================================================
+   17. REDUCED MOTION
+
+   Everything decorative stops. The page still works, still changes the
+   weather, still makes sound — it just doesn't move on its own.
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .reveal { opacity: 1; transform: none; }
+
+  /* The rays' visibility is an animated property, so killing animations
+     would hide them entirely. Pin them back on. */
+  .sun-rays-long   { opacity: var(--ray-alpha); }
+  .sun-rays-mid    { opacity: calc(var(--ray-alpha) * .8); }
+  .sun-rays-spokes { opacity: calc(var(--ray-alpha) * .9); }
+
+  .critters { display: none; }
+}
